@@ -1,0 +1,66 @@
+version: '3.8'
+
+services:
+  user:
+    build:
+      context: ./user
+      dockerfile: Dockerfile
+    ports:
+      - "3001:3000"
+    environment:
+      - APP_PORT=3000
+      - MONGODB_URI=mongodb://mongo:27017/userdb
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - REDIS_PASSWORD=secure_password
+    depends_on:
+      - mongo
+      - redis
+
+  chat:
+    build:
+      context: ./chat
+      dockerfile: Dockerfile
+    ports:
+      - "3002:3000"
+    environment:
+      - APP_PORT=3000
+      - MONGODB_URI=mongodb://mongo:27017/chatdb
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - REDIS_PASSWORD=secure_password
+    depends_on:
+      - mongo
+      - redis
+
+  mail:
+    build:
+      context: ./mail
+      dockerfile: Dockerfile
+    ports:
+      - "3003:3000"
+    environment:
+      - APP_PORT=3000
+      - MONGODB_URI=mongodb://mongo:27017/maildb
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - REDIS_PASSWORD=secure_password
+    depends_on:
+      - mongo
+      - redis
+
+  mongo:
+    image: mongo:latest
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+
+  redis:
+    image: redis:latest
+    command: ["redis-server", "--requirepass", "secure_password"]
+    ports:
+      - "6379:6379"
+
+volumes:
+  mongo_data:
