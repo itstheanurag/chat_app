@@ -10,12 +10,11 @@ services:
     environment:
       - APP_PORT=3000
       - MONGODB_URI=mongodb://mongo:27017/userdb
-      - REDIS_HOST=redis
-      - REDIS_PORT=6379
-      - REDIS_PASSWORD=secure_password
+      - REDIS_URI=redis://redis:6379
+      - RABBITMQ_URL=amqp://guest:guest@rabbitmq:5672
     depends_on:
       - mongo
-      - redis
+      - rabbitmq
 
   chat:
     build:
@@ -26,12 +25,9 @@ services:
     environment:
       - APP_PORT=3000
       - MONGODB_URI=mongodb://mongo:27017/chatdb
-      - REDIS_HOST=redis
-      - REDIS_PORT=6379
-      - REDIS_PASSWORD=secure_password
+      - REDIS_URI=redis://redis:6379
     depends_on:
       - mongo
-      - redis
 
   mail:
     build:
@@ -41,26 +37,29 @@ services:
       - "3003:3000"
     environment:
       - APP_PORT=3000
-      - MONGODB_URI=mongodb://mongo:27017/maildb
-      - REDIS_HOST=redis
-      - REDIS_PORT=6379
-      - REDIS_PASSWORD=secure_password
+      - RABBITMQ_URL=amqp://guest:guest@rabbitmq:5672
     depends_on:
-      - mongo
-      - redis
+      - rabbitmq
 
   mongo:
     image: mongo:latest
     ports:
       - "27017:27017"
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=admin
+      - MONGO_INITDB_ROOT_PASSWORD=secret
     volumes:
       - mongo_data:/data/db
 
-  redis:
-    image: redis:latest
-    command: ["redis-server", "--requirepass", "secure_password"]
+
+  rabbitmq:
+    image: rabbitmq:3-management
     ports:
-      - "6379:6379"
+      - "5672:5672"   # RabbitMQ main port
+      - "15672:15672" # Management UI
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
 
 volumes:
   mongo_data:
+  rabbitmq_data:
