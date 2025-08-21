@@ -8,17 +8,19 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "tsc",
     "start": "node dist/index.js",
-   "dev": "concurrently -k \"tsc -w\" \"nodemon --watch dist dist/index.js\""
+    "dev": "concurrently -k \"tsc -w\" \"nodemon --watch dist dist/index.js\""
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "packageManager": "pnpm@10.9.0",
   "dependencies": {
+    "@types/cors": "^2.8.19",
     "@types/jsonwebtoken": "^9.0.10",
     "@types/node": "^24.2.0",
     "amqplib": "^0.10.8",
     "bcrypt": "^6.0.0",
+    "cors": "^2.8.5",
     "dotenv": "^17.2.1",
     "express": "^5.1.0",
     "jsonwebtoken": "^9.0.2",
