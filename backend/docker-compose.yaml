@@ -1,46 +1,4 @@
-version: '3.8'
-
 services:
-  user:
-    build:
-      context: ./user
-      dockerfile: Dockerfile
-    ports:
-      - "3001:3000"
-    environment:
-      - APP_PORT=3000
-      - MONGODB_URI=mongodb://mongo:27017/userdb
-      - REDIS_URI=redis://redis:6379
-      - RABBITMQ_URL=amqp://guest:guest@rabbitmq:5672
-    depends_on:
-      - mongo
-      - rabbitmq
-
-  chat:
-    build:
-      context: ./chat
-      dockerfile: Dockerfile
-    ports:
-      - "3002:3000"
-    environment:
-      - APP_PORT=3000
-      - MONGODB_URI=mongodb://mongo:27017/chatdb
-      - REDIS_URI=redis://redis:6379
-    depends_on:
-      - mongo
-
-  mail:
-    build:
-      context: ./mail
-      dockerfile: Dockerfile
-    ports:
-      - "3003:3000"
-    environment:
-      - APP_PORT=3000
-      - RABBITMQ_URL=amqp://guest:guest@rabbitmq:5672
-    depends_on:
-      - rabbitmq
-
   mongo:
     image: mongo:latest
     ports:
@@ -51,12 +9,11 @@ services:
     volumes:
       - mongo_data:/data/db
 
-
   rabbitmq:
     image: rabbitmq:3-management
     ports:
-      - "5672:5672"   # RabbitMQ main port
-      - "15672:15672" # Management UI
+      - "5672:5672"    # RabbitMQ main port
+      - "15672:15672"  # Management UI
     volumes:
       - rabbitmq_data:/var/lib/rabbitmq
 

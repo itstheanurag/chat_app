@@ -18,15 +18,12 @@ export const redisClient: RedisClientType = createClient({
 
 const startServer = async () => {
   try {
-    // Connect to MongoDB
-    await connectToDatabase();
-    console.log('✅ Connected to MongoDB');
 
-    // Connect to Redis
+    await connectToDatabase();
+
     await redisClient.connect();
     console.log('✅ Connected to Redis');
 
-    // Start Express server
     server = app.listen(PORT, () => {
       console.log(`🚀 User service is running on Port: ${PORT}`);
     });
