@@ -2,8 +2,8 @@ import express from 'express';
 import dotenv from 'dotenv';
 import mongoose from 'mongoose';
 import cors from 'cors';
-import connectToDatabase from './config/db.js';
 import { createClient, type RedisClientType } from 'redis';
+import connectToDatabase from 'config';
 
 dotenv.config();
 
@@ -30,7 +30,6 @@ if (!allowedOrigins || !allowedOrigins.length ||
   process.exit(1);
 }
 
-// ✅ Dynamic CORS middleware
 app.use(cors({
   origin: (origin, callback) => {
     if (!origin || allowedOrigins.includes('*') || allowedOrigins.includes(origin)) {
@@ -44,7 +43,6 @@ app.use(cors({
   credentials: true,
 }));
 
-// ✅ Create Redis client
 export const redisClient: RedisClientType = createClient({
   url: process.env.REDIS_URI || 'redis://localhost:6379',
 });
@@ -67,7 +65,6 @@ const startServer = async () => {
 
 startServer();
 
-// ✅ Graceful shutdown
 const gracefulShutdown = async () => {
   console.log('\n🛑 Shutting down gracefully...');
   if (server) server.close(() => console.log('🚪 HTTP server closed.'));

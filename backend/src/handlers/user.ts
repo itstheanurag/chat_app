@@ -1,9 +1,9 @@
 import type { Request, Response } from 'express';
 import jwt from 'jsonwebtoken';
-import { loginSchema, registerSchema, verifyEmailSchema } from '../validators/user.validators.js';
-import { User } from '../model/user.model.js';
 import { redisClient } from '../index.js';
-import { randomInt } from 'crypto' 
+import { randomInt } from 'crypto';
+import { User } from 'models';
+import { registerSchema, loginSchema, verifyEmailSchema } from 'validators';
 
 export const register = async (req: Request, res: Response) => {
   try {
