@@ -14,34 +14,41 @@ let server: ReturnType<typeof app.listen>;
 app.use(express.json());
 
 const allowedOrigins = process.env.CORS_ORIGINS?.split(',')
-  .map(o => o.trim())
+  .map((o) => o.trim())
   .filter(Boolean);
 const allowedMethods = process.env.CORS_METHODS?.split(',')
-  .map(m => m.trim())
+  .map((m) => m.trim())
   .filter(Boolean);
 const allowedHeaders = process.env.CORS_HEADERS?.split(',')
-  .map(h => h.trim())
+  .map((h) => h.trim())
   .filter(Boolean);
 
-if (!allowedOrigins || !allowedOrigins.length ||
-    !allowedMethods || !allowedMethods.length ||
-    !allowedHeaders || !allowedHeaders.length) {
-  console.error("❌ Missing or invalid CORS configuration in .env");
+if (
+  !allowedOrigins ||
+  !allowedOrigins.length ||
+  !allowedMethods ||
+  !allowedMethods.length ||
+  !allowedHeaders ||
+  !allowedHeaders.length
+) {
+  console.error('❌ Missing or invalid CORS configuration in .env');
   process.exit(1);
 }
 
-app.use(cors({
-  origin: (origin, callback) => {
-    if (!origin || allowedOrigins.includes('*') || allowedOrigins.includes(origin)) {
-      callback(null, true);
-    } else {
-      callback(new Error('Not allowed by CORS'));
-    }
-  },
-  methods: allowedMethods,
-  allowedHeaders: allowedHeaders,
-  credentials: true,
-}));
+app.use(
+  cors({
+    origin: (origin, callback) => {
+      if (!origin || allowedOrigins.includes('*') || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error('Not allowed by CORS'));
+      }
+    },
+    methods: allowedMethods,
+    allowedHeaders: allowedHeaders,
+    credentials: true,
+  }),
+);
 
 export const redisClient: RedisClientType = createClient({
   url: process.env.REDIS_URI || 'redis://localhost:6379',
@@ -56,7 +63,6 @@ const startServer = async () => {
     server = app.listen(PORT, () => {
       console.log(`🚀 User service is running on Port: ${PORT}`);
     });
-
   } catch (error: any) {
     console.error('❌ Startup Error:', error.message || error);
     process.exit(1);

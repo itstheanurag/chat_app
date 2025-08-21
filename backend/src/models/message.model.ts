@@ -19,10 +19,10 @@ const MessageSchema = new Schema<IMessage>(
     status: {
       type: String,
       enum: ['sent', 'delivered', 'read'],
-      default: 'sent'
-    }
+      default: 'sent',
+    },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 MessageSchema.index({ chatId: 1, createdAt: -1 });

@@ -5,9 +5,9 @@ module.exports = {
   extends: [
     'eslint:recommended',
     'plugin:@typescript-eslint/recommended',
-    'plugin:prettier/recommended' // ✅ This enables eslint-plugin-prettier + config-prettier
+    'plugin:prettier/recommended', // ✅ This enables eslint-plugin-prettier + config-prettier
   ],
   rules: {
-    'prettier/prettier': 'error' // ✅ Shows Prettier issues as ESLint errors
-  }
+    'prettier/prettier': 'error', // ✅ Shows Prettier issues as ESLint errors
+  },
 };

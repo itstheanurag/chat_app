@@ -18,11 +18,9 @@ export const register = async (req: Request, res: Response) => {
     await user.save();
 
     const otp = randomInt(100000, 999999).toString();
-    const verificationToken = jwt.sign(
-      { userId: user._id },
-      process.env.JWT_SECRET as string,
-      { expiresIn: '15m' }
-    );
+    const verificationToken = jwt.sign({ userId: user._id }, process.env.JWT_SECRET as string, {
+      expiresIn: '15m',
+    });
 
     await redisClient.setEx(`verify:${user._id}`, 15 * 60, otp);
 
@@ -40,7 +38,6 @@ export const register = async (req: Request, res: Response) => {
   }
 };
 
-
 export const login = async (req: Request, res: Response) => {
   try {
     const parsedData = loginSchema.parse(req.body);
@@ -56,9 +53,9 @@ export const login = async (req: Request, res: Response) => {
     }
 
     const token = jwt.sign(
-      {id: user._id,  name: user.name, email: user.email },
+      { id: user._id, name: user.name, email: user.email },
       process.env.JWT_SECRET as string,
-      { expiresIn: '1h' }
+      { expiresIn: '1h' },
     );
 
     return res.json({ token });
@@ -70,10 +67,9 @@ export const login = async (req: Request, res: Response) => {
   }
 };
 
-
 export const verifyEmail = async (req: Request, res: Response) => {
   try {
-    const {otp, token} = verifyEmailSchema.parse(req.body)
+    const { otp, token } = verifyEmailSchema.parse(req.body);
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET as string) as { userId: string };
     const userId = decoded.userId;

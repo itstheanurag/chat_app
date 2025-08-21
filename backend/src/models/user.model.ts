@@ -37,7 +37,7 @@ const schema: Schema<IUser> = new Schema(
       default: false,
     },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 // Hash password before saving

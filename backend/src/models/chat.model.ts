@@ -18,16 +18,16 @@ const ChatSchema = new Schema<IChat>(
     participants: [
       {
         userId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
-        joinedAt: { type: Date, default: Date.now }
-      }
+        joinedAt: { type: Date, default: Date.now },
+      },
     ],
     lastMessage: {
       text: { type: String },
       senderId: { type: Schema.Types.ObjectId, ref: 'User' },
-      createdAt: { type: Date }
-    }
+      createdAt: { type: Date },
+    },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 // Index for faster participant lookups
