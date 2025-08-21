@@ -1,7 +1,6 @@
-// src/controllers/auth.controller.ts
 import type { Request, Response } from 'express';
 import jwt from 'jsonwebtoken';
-import { loginSchema, registerSchema } from '../validators/user.validators.js';
+import { loginSchema, registerSchema, verifyEmailSchema } from '../validators/user.validators.js';
 import { User } from '../model/user.model.js';
 import { redisClient } from '../index.js';
 import { randomInt } from 'crypto' 
@@ -18,20 +17,15 @@ export const register = async (req: Request, res: Response) => {
     const user = new User(parsedData);
     await user.save();
 
-    // Generate OTP
     const otp = randomInt(100000, 999999).toString();
-
-    // Create short-lived verification token with user id
     const verificationToken = jwt.sign(
       { userId: user._id },
       process.env.JWT_SECRET as string,
       { expiresIn: '15m' }
     );
 
-    // Store OTP in Redis with expiration
     await redisClient.setEx(`verify:${user._id}`, 15 * 60, otp);
 
-    // TODO: Send OTP to user via email
     console.log(`OTP for ${user.email}: ${otp}`);
 
     return res.status(201).json({
@@ -79,13 +73,10 @@ export const login = async (req: Request, res: Response) => {
 
 export const verifyEmail = async (req: Request, res: Response) => {
   try {
-    const { otp, token } = req.body;
+    const {otp, token} = verifyEmailSchema.parse(req.body)
 
-    // Verify token and extract userId
     const decoded = jwt.verify(token, process.env.JWT_SECRET as string) as { userId: string };
     const userId = decoded.userId;
-
-    // Get stored OTP from Redis
     const storedOtp = await redisClient.get(`verify_otp:${userId}`);
     if (!storedOtp) {
       return res.status(400).json({ message: 'OTP expired or not found' });
@@ -95,10 +86,7 @@ export const verifyEmail = async (req: Request, res: Response) => {
       return res.status(400).json({ message: 'Invalid OTP' });
     }
 
-    // Mark user as verified
     await User.findByIdAndUpdate(userId, { isEmailVerified: true });
-
-    // Delete OTP from Redis
     await redisClient.del(`verify:${userId}`);
 
     return res.json({ message: 'Email verified successfully' });

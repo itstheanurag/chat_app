@@ -12,5 +12,13 @@ export const loginSchema = z.object({
   password: z.string().min(6),
 });
 
+
+export const verifyEmailSchema = z.object({
+  otp: z.string(),
+  token: z.string()
+});
+
+
 export type RegisterInput = z.infer<typeof registerSchema>;
 export type LoginInput = z.infer<typeof loginSchema>;
+export type EmailVerification = z.infer<typeof verifyEmailSchema>;
