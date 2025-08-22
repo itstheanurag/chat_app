@@ -3,7 +3,7 @@ import jwt from 'jsonwebtoken';
 import { redisClient } from '../index.js';
 import { randomInt } from 'crypto';
 import { User } from 'models';
-import { registerSchema, loginSchema, verifyEmailSchema } from 'validators';
+import { registerSchema, loginSchema, verifyEmailSchema } from 'types/index.js';
 
 export const register = async (req: Request, res: Response) => {
   try {

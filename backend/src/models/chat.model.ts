@@ -2,12 +2,16 @@ import { Schema, model, Types, Document } from 'mongoose';
 
 export interface IChat extends Document {
   type: 'direct' | 'group';
+  name?: string;
+  avatar?: string;
   participants: { userId: Types.ObjectId; joinedAt: Date }[];
   lastMessage?: {
     text: string;
     senderId: Types.ObjectId;
     createdAt: Date;
   };
+  isArchived?: boolean;
+  isDeleted?: boolean;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -15,6 +19,8 @@ export interface IChat extends Document {
 const ChatSchema = new Schema<IChat>(
   {
     type: { type: String, enum: ['direct', 'group'], required: true },
+    name: { type: String, trim: true },
+    avatar: { type: String },
     participants: [
       {
         userId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
@@ -26,11 +32,12 @@ const ChatSchema = new Schema<IChat>(
       senderId: { type: Schema.Types.ObjectId, ref: 'User' },
       createdAt: { type: Date },
     },
+    isArchived: { type: Boolean, default: false },
+    isDeleted: { type: Boolean, default: false },
   },
   { timestamps: true },
 );
 
-// Index for faster participant lookups
 ChatSchema.index({ 'participants.userId': 1 });
 
 export const Chat = model<IChat>('Chat', ChatSchema);

@@ -4,6 +4,7 @@ import mongoose from 'mongoose';
 import cors from 'cors';
 import { createClient, type RedisClientType } from 'redis';
 import connectToDatabase from 'config';
+import helmet from 'helmet';
 
 dotenv.config();
 
@@ -12,6 +13,8 @@ const PORT = process.env.APP_PORT || 3000;
 let server: ReturnType<typeof app.listen>;
 
 app.use(express.json());
+app.use(express.urlencoded({ limit: '2mb', extended: true }));
+app.use(helmet())
 
 const allowedOrigins = process.env.CORS_ORIGINS?.split(',')
   .map((o) => o.trim())
@@ -73,10 +76,31 @@ startServer();
 
 const gracefulShutdown = async () => {
   console.log('\n🛑 Shutting down gracefully...');
-  if (server) server.close(() => console.log('🚪 HTTP server closed.'));
-  await mongoose.connection.close().catch(console.error);
-  await redisClient.disconnect().catch(console.error);
-  process.exit(0);
+
+  try {
+    if (server) {
+      await new Promise<void>((resolve, reject) => {
+        server.close((err) => {
+          if (err) {
+            return reject(err);
+          }
+          console.log('🚪 HTTP server closed.');
+          resolve();
+        });
+      });
+    }
+
+    await mongoose.connection.close();
+    console.log('✅ MongoDB connection closed.');
+
+    await redisClient.destroy();
+    console.log('✅ Redis client disconnected.');
+
+    process.exit(0);
+  } catch (error) {
+    console.error('❌ Error during shutdown:', error);
+    process.exit(1);
+  }
 };
 
 process.on('SIGINT', gracefulShutdown);
