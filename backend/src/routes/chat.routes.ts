@@ -5,6 +5,7 @@ import {
   createChat,
   deleteChat,
   listUserChats,
+  listUsersArchivedChats,
   removeUsersFromGroupChat,
 } from "handlers/chat";
 import { auth } from "middleware/auth";
@@ -14,16 +15,16 @@ const router: Router = Router();
 
 router.use(auth);
 
-router.post("/chat", createChat);
-router.get("/chat", listUserChats);
-router.get("/chat/archived");
+router.post("/", createChat);
+router.get("/", listUserChats);
+router.get("/archived", listUsersArchivedChats);
 
 router.use(chatGuard);
 
-router.patch("/chat/:chatId/archive", archiveChat);
-router.patch("/chat/:chatId/unarchive", archiveChat);
-router.patch("/chat/:chatId/add/participant", addUsersToGroupChat);
-router.patch("/chat/:chatId/remove/participant", removeUsersFromGroupChat);
-router.delete("/chat/:chatId", deleteChat);
+router.patch("/:chatId/archive", archiveChat);
+router.patch("/:chatId/unarchive", archiveChat);
+router.patch("/:chatId/add/participant", addUsersToGroupChat);
+router.patch("/:chatId/remove/participant", removeUsersFromGroupChat);
+router.delete("/:chatId", deleteChat);
 
 export default router;

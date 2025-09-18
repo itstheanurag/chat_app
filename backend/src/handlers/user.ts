@@ -7,6 +7,7 @@ import { registerSchema, loginSchema, verifyEmailSchema } from "schemas";
 import { AuthenticatedRequest } from "middleware/auth";
 import { sendResponse, sendError } from "lib/response";
 import { Types } from "mongoose";
+import z from "zod";
 
 export const register = async (
   req: Request,
@@ -93,8 +94,7 @@ export const verifyEmail = async (
     const parsedResult = verifyEmailSchema.safeParse(req.body);
 
     if (!parsedResult.success) {
-      // Validation failed
-      return sendError(res, 400, parsedResult.error.format());
+      return sendError(res, 400, parsedResult.error);
     }
 
     const { otp, token } = parsedResult.data;
