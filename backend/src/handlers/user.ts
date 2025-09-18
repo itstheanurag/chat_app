@@ -5,10 +5,19 @@ import { User } from "models";
 import { redisClient } from "lib/server";
 import { registerSchema, loginSchema, verifyEmailSchema } from "schemas";
 import { sendResponse, sendError } from "lib/response";
+import { AuthenticatedRequest } from "middleware/auth";
 
 export const register = async (req: Request, res: Response): Promise<void> => {
   try {
-    const parsedData = registerSchema.parse(req.body);
+    const parsedResult = registerSchema.safeParse(req.body);
+
+    if (!parsedResult.success) {
+      // Validation failed
+      sendError(res, 400, parsedResult.error.format());
+      return;
+    }
+
+    const parsedData = parsedResult.data;
 
     const existingUser = await User.findOne({ email: parsedData.email });
     if (existingUser) {
@@ -20,6 +29,7 @@ export const register = async (req: Request, res: Response): Promise<void> => {
     await user.save();
 
     const otp = randomInt(100000, 999999).toString();
+    console.log(otp);
     const verificationToken = jwt.sign(
       { userId: user._id },
       process.env.JWT_SECRET as string,
@@ -42,7 +52,15 @@ export const register = async (req: Request, res: Response): Promise<void> => {
 
 export const login = async (req: Request, res: Response): Promise<void> => {
   try {
-    const parsedData = loginSchema.parse(req.body);
+    const parsedResult = loginSchema.safeParse(req.body);
+
+    if (!parsedResult.success) {
+      // Validation failed
+      sendError(res, 400, parsedResult.error.format());
+      return;
+    }
+
+    const parsedData = parsedResult.data;
 
     const user = await User.findOne({ email: parsedData.email });
     if (!user) {
@@ -73,7 +91,15 @@ export const verifyEmail = async (
   res: Response
 ): Promise<void> => {
   try {
-    const { otp, token } = verifyEmailSchema.parse(req.body);
+    const parsedResult = verifyEmailSchema.safeParse(req.body);
+
+    if (!parsedResult.success) {
+      // Validation failed
+      sendError(res, 400, parsedResult.error.format());
+      return;
+    }
+
+    const { otp, token } = parsedResult.data;
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET as string) as {
       userId: string;
@@ -95,6 +121,18 @@ export const verifyEmail = async (
     await redisClient.del(`verify:${userId}`);
 
     sendResponse(res, 200, null, "Email verified successfully");
+  } catch (err) {
+    sendError(res, 400, err);
+  }
+};
+
+export const userLogInCheck = async (
+  req: AuthenticatedRequest,
+  res: Response
+): Promise<void> => {
+  try {
+    const { user } = req;
+    sendResponse(res, 200, user, "user is loggedIn");
   } catch (err) {
     sendError(res, 400, err);
   }

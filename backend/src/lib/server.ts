@@ -59,9 +59,9 @@ app.use(
 );
 
 // Routes
-app.use("/api/users", userRoutes);
-app.use("/api/chats", chatRoutes);
-app.use("/api/messages", messageRoutes);
+app.use("/api/v1/users", userRoutes);
+app.use("/api/v1/chats", chatRoutes);
+app.use("/api/v1/messages", messageRoutes);
 
 export const redisClient: RedisClientType = createClient({
   url: process.env.REDIS_URI || "redis://localhost:6379",

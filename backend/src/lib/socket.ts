@@ -36,7 +36,6 @@ export function initializeSocket({
     },
   });
 
-  // Middleware for authentication
   io.use((socket: AuthenticatedSocket, next) => {
     const token = socket.handshake.query.token as string;
     if (!token) return next(new Error("Authentication error"));
@@ -57,16 +56,3 @@ export function initializeSocket({
 
   return io;
 }
-
-// export function handleChatMessage(socket: AuthenticatedSocket, message: any) {
-//   console.log(`📨 Message from ${socket.user?.name || "Unknown"}:`, message);
-
-//   const chatMessage = {
-//     user: socket.user?.name || "Anonymous",
-//     message: message.text,
-//     timestamp: new Date().toISOString(),
-//   };
-
-//   // Broadcast to all clients
-//   socket.broadcast.emit("message", chatMessage);
-// }
