@@ -6,6 +6,7 @@ import { redisClient } from "lib/server";
 import { registerSchema, loginSchema, verifyEmailSchema } from "schemas";
 import { AuthenticatedRequest } from "middleware/auth";
 import { sendResponse, sendError } from "lib/response";
+import { Types } from "mongoose";
 
 export const register = async (
   req: Request,
@@ -130,5 +131,48 @@ export const userLogInCheck = async (
     return sendResponse(res, 200, user, "user is loggedIn");
   } catch (err) {
     return sendError(res, 400, err);
+  }
+};
+
+export const searchUser = async (
+  req: AuthenticatedRequest,
+  res: Response
+): Promise<Response> => {
+  try {
+    const userId = req.user?.id;
+
+    if (!userId) {
+      return sendError(res, 400, "Not qualified to search");
+    }
+
+    const { q } = req.query;
+
+    if (!q || typeof q !== "string" || q.trim() === "") {
+      return sendError(res, 400, "Query parameter 'q' is required");
+    }
+
+    const regex = new RegExp(q.trim(), "i");
+
+    const users = await User.find({
+      $and: [
+        {
+          $or: [{ name: regex }, { email: regex }],
+        },
+        { _id: { $ne: userId } }, // exclude current user
+      ],
+    })
+      .select("name email _id")
+      .limit(20);
+
+    const formatted = users.map((u) => ({
+      id: (u._id as Types.ObjectId).toString(),
+      name: u.name,
+      email: u.email,
+    }));
+
+    return sendResponse(res, 200, formatted, "Users fetched successfully");
+  } catch (err) {
+    console.error("Search user error:", err);
+    return sendError(res, 500, "Failed to search users");
   }
 };
