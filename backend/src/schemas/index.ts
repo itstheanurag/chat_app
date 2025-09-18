@@ -62,6 +62,10 @@ export const chatSchema = z.object({
   isDeleted: z.boolean().optional(),
 });
 
+export const modifyParticipantsSchema = z.object({
+  userIds: z.array(z.string()).nonempty("At least one user ID is required"),
+});
+
 export type MessageInput = z.infer<typeof messageSchema>;
 export type ChatInput = z.infer<typeof chatSchema>;
 

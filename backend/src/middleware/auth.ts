@@ -10,6 +10,7 @@ export interface JwtPayloadOptions extends JwtPayload {
 
 export interface AuthenticatedRequest extends Request {
   user?: JwtPayloadOptions;
+  chat?: any;
 }
 
 function isJwtPayloadOptions(obj: unknown): obj is JwtPayloadOptions {
@@ -26,39 +27,34 @@ export function auth(
   req: AuthenticatedRequest,
   res: Response,
   next: NextFunction
-): void {
+): Response | void {
   const secret = process.env.JWT_SECRET;
   if (!secret) {
     console.error("JWT_SECRET is not configured");
-    sendError(res, 500, "Server configuration error");
-    return;
+    return sendError(res, 500, "Server configuration error");
   }
 
   const authHeader = req.get("authorization");
   if (!authHeader?.startsWith("Bearer ")) {
-    sendError(res, 401, "Authorization token missing or invalid");
-    return;
+    return sendError(res, 401, "Authorization token missing or invalid");
   }
 
   const token = authHeader.split(" ")[1];
   if (!token) {
-    sendError(res, 401, "Authorization token missing or invalid");
-    return;
+    return sendError(res, 401, "Authorization token missing or invalid");
   }
 
   try {
     const decoded = jwt.verify(token, secret);
 
     if (!isJwtPayloadOptions(decoded)) {
-      console.error("JWT payload does not contain required fields:", decoded);
-      sendError(res, 403, "Invalid token payload");
-      return;
+      return sendError(res, 403, "Invalid token payload");
     }
 
     req.user = decoded;
     next();
   } catch (err) {
     console.error("JWT verification failed:", err);
-    sendError(res, 403, "Invalid or expired token");
+    return sendError(res, 403, "Invalid or expired token");
   }
 }

@@ -4,25 +4,26 @@ import { randomInt } from "crypto";
 import { User } from "models";
 import { redisClient } from "lib/server";
 import { registerSchema, loginSchema, verifyEmailSchema } from "schemas";
-import { sendResponse, sendError } from "lib/response";
 import { AuthenticatedRequest } from "middleware/auth";
+import { sendResponse, sendError } from "lib/response";
 
-export const register = async (req: Request, res: Response): Promise<void> => {
+export const register = async (
+  req: Request,
+  res: Response
+): Promise<Response> => {
   try {
     const parsedResult = registerSchema.safeParse(req.body);
 
     if (!parsedResult.success) {
       // Validation failed
-      sendError(res, 400, parsedResult.error.format());
-      return;
+      return sendError(res, 400, parsedResult.error.format());
     }
 
     const parsedData = parsedResult.data;
 
     const existingUser = await User.findOne({ email: parsedData.email });
     if (existingUser) {
-      sendError(res, 400, "Email already in use");
-      return;
+      return sendError(res, 400, "Email already in use");
     }
 
     const user = new User(parsedData);
@@ -39,39 +40,36 @@ export const register = async (req: Request, res: Response): Promise<void> => {
     await redisClient.setEx(`verify:${user._id}`, 15 * 60, otp);
     console.log(`OTP for ${user.email}: ${otp}`);
 
-    sendResponse(
+    return sendResponse(
       res,
       201,
       { verificationToken },
       "User registered successfully. Please verify your email."
     );
   } catch (err) {
-    sendError(res, 400, err);
+    return sendError(res, 400, err);
   }
 };
 
-export const login = async (req: Request, res: Response): Promise<void> => {
+export const login = async (req: Request, res: Response): Promise<Response> => {
   try {
     const parsedResult = loginSchema.safeParse(req.body);
 
     if (!parsedResult.success) {
       // Validation failed
-      sendError(res, 400, parsedResult.error.format());
-      return;
+      return sendError(res, 400, parsedResult.error.format());
     }
 
     const parsedData = parsedResult.data;
 
     const user = await User.findOne({ email: parsedData.email });
     if (!user) {
-      sendError(res, 400, "Invalid credentials");
-      return;
+      return sendError(res, 400, "Invalid credentials");
     }
 
     const isMatch = await user.comparePassword(parsedData.password);
     if (!isMatch) {
-      sendError(res, 400, "Invalid credentials");
-      return;
+      return sendError(res, 400, "Invalid credentials");
     }
 
     const token = jwt.sign(
@@ -80,23 +78,22 @@ export const login = async (req: Request, res: Response): Promise<void> => {
       { expiresIn: "1h" }
     );
 
-    sendResponse(res, 200, { token }, "Login successful");
+    return sendResponse(res, 200, { token }, "Login successful");
   } catch (err) {
-    sendError(res, 400, err);
+    return sendError(res, 400, err);
   }
 };
 
 export const verifyEmail = async (
   req: Request,
   res: Response
-): Promise<void> => {
+): Promise<Response> => {
   try {
     const parsedResult = verifyEmailSchema.safeParse(req.body);
 
     if (!parsedResult.success) {
       // Validation failed
-      sendError(res, 400, parsedResult.error.format());
-      return;
+      return sendError(res, 400, parsedResult.error.format());
     }
 
     const { otp, token } = parsedResult.data;
@@ -108,32 +105,30 @@ export const verifyEmail = async (
 
     const storedOtp = await redisClient.get(`verify:${userId}`);
     if (!storedOtp) {
-      sendError(res, 400, "OTP expired or not found");
-      return;
+      return sendError(res, 400, "OTP expired or not found");
     }
 
     if (storedOtp !== otp) {
-      sendError(res, 400, "Invalid OTP");
-      return;
+      return sendError(res, 400, "Invalid OTP");
     }
 
     await User.findByIdAndUpdate(userId, { isEmailVerified: true });
     await redisClient.del(`verify:${userId}`);
 
-    sendResponse(res, 200, null, "Email verified successfully");
+    return sendResponse(res, 200, null, "Email verified successfully");
   } catch (err) {
-    sendError(res, 400, err);
+    return sendError(res, 400, err);
   }
 };
 
 export const userLogInCheck = async (
   req: AuthenticatedRequest,
   res: Response
-): Promise<void> => {
+): Promise<Response> => {
   try {
     const { user } = req;
-    sendResponse(res, 200, user, "user is loggedIn");
+    return sendResponse(res, 200, user, "user is loggedIn");
   } catch (err) {
-    sendError(res, 400, err);
+    return sendError(res, 400, err);
   }
 };
