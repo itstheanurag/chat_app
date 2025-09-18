@@ -1,33 +1,18 @@
 # Chat App Backend
 
-This project is a microservices-based chat application backend, consisting of three main services: User, Chat, and Mail. Each service is designed to handle specific functionalities and can be deployed independently. The application also utilizes MongoDB for data storage and Redis for caching.
+This project is the backend for a chat application, built with Node.js, Express, TypeScript, MongoDB, and Redis.
 
-## Services Overview
+## Overview
 
-### User Microservice
-
-- **Path**: `user/`
-- **Description**: Manages user authentication, registration, and profile management.
-- **Entry Point**: `user/src/index.ts`
-
-### Chat Microservice
-
-- **Path**: `chat/`
-- **Description**: Handles real-time chat functionalities, including message sending and receiving.
-- **Entry Point**: `chat/src/index.ts`
-
-### Mail Microservice
-
-- **Path**: `mail/`
-- **Description**: Manages email notifications and communications.
-- **Entry Point**: `mail/src/index.ts`
+- **Entry Point**: `src/index.ts`
+- **Description**: Handles user authentication, chat messaging, and email notifications in a single service.
 
 ## Technologies Used
 
-- **Node.js**: JavaScript runtime for building the services.
-- **Express**: Web framework for Node.js to handle HTTP requests.
+- **Node.js**: JavaScript runtime for building the backend.
+- **Express**: Web framework for handling HTTP requests.
 - **MongoDB**: NoSQL database for data storage.
-- **Redis**: In-memory data structure store for caching.
+- **Redis**: In-memory data structure store for caching and session management.
 - **TypeScript**: Superset of JavaScript for type safety.
 
 ## Getting Started
@@ -41,28 +26,26 @@ This project is a microservices-based chat application backend, consisting of th
 
 1. Clone the repository:
 
-   ```
+   ```sh
    git clone <repository-url>
-   cd chat_app-backend
+   cd chat_app/backend
    ```
 
-2. Build and start the services using Docker Compose:
+2. Build and start the service using Docker Compose:
 
-   ```
+   ```sh
    docker-compose up --build
    ```
 
-3. Access the services:
-   - User Service: `http://localhost:3000`
-   - Chat Service: `http://localhost:3001`
-   - Mail Service: `http://localhost:3002`
+3. Access the backend service at:  
+   `http://localhost:3000`
 
-### Stopping the Services
+### Stopping the Service
 
-To stop the services, run:
+To stop the service, run:
 
-```
-docker-compose down
+```sh
+docker compose down
 ```
 
 ## Contributing
