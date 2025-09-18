@@ -88,25 +88,32 @@ export const startServer = async () => {
 };
 
 export const gracefulShutdown = async (
-  server: ReturnType<typeof app.listen>
+  server?: ReturnType<typeof app.listen>
 ) => {
   console.log("\n🛑 Shutting down gracefully...");
   try {
-    if (server) {
+    if (server && server.listening) {
       await new Promise<void>((resolve, reject) => {
-        server.close((err: unknown) => {
+        server.close((err) => {
           if (err) return reject(err);
           console.log("🚪 HTTP server closed.");
           resolve();
         });
       });
+    } else {
+      console.log("⚠️ No HTTP server running, skipping server.close()");
     }
 
-    await mongoose.connection.close();
-    console.log("✅ MongoDB connection closed.");
+    if (mongoose.connection.readyState) {
+      await mongoose.connection.close();
+      console.log("✅ MongoDB connection closed.");
+    }
 
-    await redisClient.quit();
-    console.log("✅ Redis client disconnected.");
+    if (redisClient.isOpen) {
+      await redisClient.quit();
+      console.log("✅ Redis client disconnected.");
+    }
+
     process.exit(0);
   } catch (err) {
     console.error("❌ Error during shutdown:", err);

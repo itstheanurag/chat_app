@@ -1,4 +1,4 @@
-import { Server } from "socket.io";
+import { Server, Socket } from "socket.io";
 import jwt from "jsonwebtoken";
 import type { Server as HTTPServer } from "http";
 
@@ -6,6 +6,10 @@ interface JwtPayloadOptions {
   id: string;
   email: string;
   name: string;
+}
+
+export interface AuthenticatedSocket extends Socket {
+  user?: JwtPayloadOptions;
 }
 
 interface InitSocketOptions {
@@ -33,27 +37,36 @@ export function initializeSocket({
   });
 
   // Middleware for authentication
-  io.use((socket, next) => {
+  io.use((socket: AuthenticatedSocket, next) => {
     const token = socket.handshake.query.token as string;
     if (!token) return next(new Error("Authentication error"));
 
     try {
       const decoded = jwt.verify(token, jwtSecret) as JwtPayloadOptions;
-      socket.user = decoded; // ✅ TypeScript now knows about this
+      socket.user = decoded;
       next();
     } catch (err) {
-      console.error("❌ JWT verification failed:", err);
+      console.error("JWT verification failed:", err);
       next(new Error("Authentication error"));
     }
   });
 
-  io.on("connection", (socket) => {
-    console.log(`✅ User connected: ${socket.user?.name || "Unknown"}`);
-
-    socket.on("disconnect", () => {
-      console.log(`❌ User disconnected: ${socket.user?.name || "Unknown"}`);
-    });
+  io.on("connection", (socket: AuthenticatedSocket) => {
+    console.log(`User connected: ${socket.user?.name || "Unknown"}`);
   });
 
   return io;
 }
+
+// export function handleChatMessage(socket: AuthenticatedSocket, message: any) {
+//   console.log(`📨 Message from ${socket.user?.name || "Unknown"}:`, message);
+
+//   const chatMessage = {
+//     user: socket.user?.name || "Anonymous",
+//     message: message.text,
+//     timestamp: new Date().toISOString(),
+//   };
+
+//   // Broadcast to all clients
+//   socket.broadcast.emit("message", chatMessage);
+// }

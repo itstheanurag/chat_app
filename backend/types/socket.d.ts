@@ -1,5 +1,4 @@
-import { JwtPayloadOptions } from "middleware/auth";
-import "socket.io";
+import { JwtPayloadOptions } from "../src/middleware/auth";
 
 declare module "socket.io" {
   interface Socket {

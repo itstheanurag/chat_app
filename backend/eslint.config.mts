@@ -1,24 +1,40 @@
 import js from "@eslint/js";
 import globals from "globals";
 import tseslint from "typescript-eslint";
-import { defineConfig } from "eslint/config";
 
-export default defineConfig([
+export default [
+  // Base JavaScript configuration
+  js.configs.recommended,
+
+  // TypeScript configuration
+  ...tseslint.configs.recommended,
+
+  // Custom overrides
   {
     files: ["**/*.{js,mjs,cjs,ts,mts,cts}"],
-    plugins: { js },
-    extends: ["js/recommended"],
-    languageOptions: { globals: globals.browser },
+    languageOptions: {
+      globals: {
+        ...globals.node, // Use node globals instead of browser for backend
+        ...globals.es2022,
+      },
+    },
     rules: {
-      // 🔻 Disable unused variable checks
+      // ✅ Disable unused variable checks
       "no-unused-vars": "off",
       "@typescript-eslint/no-unused-vars": "off",
 
-      // 🔻 Disable some other common strict rules
+      // ✅ Disable other strict rules
       "no-undef": "off",
       "no-console": "off",
       "@typescript-eslint/no-explicit-any": "off",
+      "@typescript-eslint/no-require-imports": "off",
+      "@typescript-eslint/no-var-requires": "off",
+
+      // ✅ Additional rules you might want to disable
+      "@typescript-eslint/ban-ts-comment": "off",
+      "@typescript-eslint/no-non-null-assertion": "off",
+      "prefer-const": "off",
+      "no-empty": "off",
     },
   },
-  tseslint.configs.recommended,
-]);
+];

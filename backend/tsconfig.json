@@ -13,12 +13,18 @@
     "noUncheckedIndexedAccess": true,
     "exactOptionalPropertyTypes": true,
     "skipLibCheck": true,
-    "types": ["node"]
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "forceConsistentCasingInFileNames": true,
+    "resolveJsonModule": true,
+    "types": ["node"],
+    "typeRoots": ["./node_modules/@types", "./types"],
+    "paths": {
+      "handlers/*": ["./handlers/*"],
+      "middleware/*": ["./middleware/*"],
+      "types/*": ["./types/*"]
+    }
   },
-  "include": ["src/**/*.ts", "src/types/**/*.d.ts"],
-  "exclude": ["node_modules", "dist"],
-  "paths": {
-    "handlers/*": ["src/handlers/*"],
-    "middleware/*": ["src/middleware/*"]
-  }
+  "include": ["src/**/*", "types/**/*"],
+  "exclude": ["node_modules", "dist"]
 }
