@@ -1,7 +1,6 @@
 import { Router } from "express";
-import { createMessage, getMessages } from "handlers/messages";
-import auth from "middleware";
-
+import { createMessage, getMessages } from "handlers";
+import { auth } from "middleware/auth";
 const router: Router = Router();
 
 router.use(auth);

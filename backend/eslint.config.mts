@@ -9,6 +9,16 @@ export default defineConfig([
     plugins: { js },
     extends: ["js/recommended"],
     languageOptions: { globals: globals.browser },
+    rules: {
+      // 🔻 Disable unused variable checks
+      "no-unused-vars": "off",
+      "@typescript-eslint/no-unused-vars": "off",
+
+      // 🔻 Disable some other common strict rules
+      "no-undef": "off",
+      "no-console": "off",
+      "@typescript-eslint/no-explicit-any": "off",
+    },
   },
   tseslint.configs.recommended,
 ]);

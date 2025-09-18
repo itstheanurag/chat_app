@@ -4,14 +4,16 @@ import { randomInt } from "crypto";
 import { User } from "models";
 import { redisClient } from "lib/server";
 import { registerSchema, loginSchema, verifyEmailSchema } from "schemas";
+import { sendResponse, sendError } from "lib/response";
 
-export const register = async (req: Request, res: Response) => {
+export const register = async (req: Request, res: Response): Promise<void> => {
   try {
     const parsedData = registerSchema.parse(req.body);
 
     const existingUser = await User.findOne({ email: parsedData.email });
     if (existingUser) {
-      return res.status(400).json({ message: "Email already in use" });
+      sendError(res, 400, "Email already in use");
+      return;
     }
 
     const user = new User(parsedData);
@@ -21,39 +23,37 @@ export const register = async (req: Request, res: Response) => {
     const verificationToken = jwt.sign(
       { userId: user._id },
       process.env.JWT_SECRET as string,
-      {
-        expiresIn: "15m",
-      }
+      { expiresIn: "15m" }
     );
 
     await redisClient.setEx(`verify:${user._id}`, 15 * 60, otp);
-
     console.log(`OTP for ${user.email}: ${otp}`);
 
-    return res.status(201).json({
-      message: "User registered successfully. Please verify your email.",
-      verificationToken,
-    });
+    sendResponse(
+      res,
+      201,
+      { verificationToken },
+      "User registered successfully. Please verify your email."
+    );
   } catch (err) {
-    if (err instanceof Error) {
-      return res.status(400).json({ message: err.message });
-    }
-    return res.status(500).json({ message: "Something went wrong" });
+    sendError(res, 400, err);
   }
 };
 
-export const login = async (req: Request, res: Response) => {
+export const login = async (req: Request, res: Response): Promise<void> => {
   try {
     const parsedData = loginSchema.parse(req.body);
 
     const user = await User.findOne({ email: parsedData.email });
     if (!user) {
-      return res.status(400).json({ message: "Invalid credentials" });
+      sendError(res, 400, "Invalid credentials");
+      return;
     }
 
     const isMatch = await user.comparePassword(parsedData.password);
     if (!isMatch) {
-      return res.status(400).json({ message: "Invalid credentials" });
+      sendError(res, 400, "Invalid credentials");
+      return;
     }
 
     const token = jwt.sign(
@@ -62,16 +62,16 @@ export const login = async (req: Request, res: Response) => {
       { expiresIn: "1h" }
     );
 
-    return res.json({ token });
+    sendResponse(res, 200, { token }, "Login successful");
   } catch (err) {
-    if (err instanceof Error) {
-      return res.status(400).json({ message: err.message });
-    }
-    return res.status(500).json({ message: "Something went wrong" });
+    sendError(res, 400, err);
   }
 };
 
-export const verifyEmail = async (req: Request, res: Response) => {
+export const verifyEmail = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
   try {
     const { otp, token } = verifyEmailSchema.parse(req.body);
 
@@ -79,23 +79,23 @@ export const verifyEmail = async (req: Request, res: Response) => {
       userId: string;
     };
     const userId = decoded.userId;
-    const storedOtp = await redisClient.get(`verify_otp:${userId}`);
+
+    const storedOtp = await redisClient.get(`verify:${userId}`);
     if (!storedOtp) {
-      return res.status(400).json({ message: "OTP expired or not found" });
+      sendError(res, 400, "OTP expired or not found");
+      return;
     }
 
     if (storedOtp !== otp) {
-      return res.status(400).json({ message: "Invalid OTP" });
+      sendError(res, 400, "Invalid OTP");
+      return;
     }
 
     await User.findByIdAndUpdate(userId, { isEmailVerified: true });
     await redisClient.del(`verify:${userId}`);
 
-    return res.json({ message: "Email verified successfully" });
+    sendResponse(res, 200, null, "Email verified successfully");
   } catch (err) {
-    if (err instanceof Error) {
-      return res.status(400).json({ message: err.message });
-    }
-    return res.status(500).json({ message: "Something went wrong" });
+    sendError(res, 400, err);
   }
 };

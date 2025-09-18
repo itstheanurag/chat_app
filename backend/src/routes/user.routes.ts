@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { login, register } from "handlers/user";
+import { login, register } from "handlers";
 const router: Router = Router();
 
 router.post("/register", register);
