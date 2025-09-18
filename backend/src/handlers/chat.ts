@@ -1,6 +1,8 @@
-import { chatSchema } from "types"
+import { Server } from "socket.io";
+import { AuthenticatedSocket } from "../types";
 
-export const createChat = async ( req: Request, res: Response ) => {
-    const parsedChatData = chatSchema.safeParse(req.body);
-    
-} 
+export const chatHandler = (io: Server, socket: AuthenticatedSocket) => {
+  socket.on("sendMessage", (message) => {
+    io.emit("receiveMessage", message);
+  });
+};

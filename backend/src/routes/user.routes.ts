@@ -1,10 +1,8 @@
-import express, { Router } from 'express';
-import { login, verifyEmail, register } from '../handlers/user.js';
+import { Router } from "express";
+import { login, register } from "handlers/user";
+const router: Router = Router();
 
-const userRouter: Router = express.Router();
+router.post("/register", register);
+router.post("/login", login);
 
-userRouter.post('/register', register);
-userRouter.post('/login', login);
-userRouter.post('/validate-otp', verifyEmail);
-
-export default userRouter;
+export default router;
