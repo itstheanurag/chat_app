@@ -10,8 +10,6 @@ interface ChatLayoutProps {
 
 export const ChatLayout: React.FC<ChatLayoutProps> = ({ currentUser }) => {
   const [selectedChatId, setSelectedChatId] = useState<string>("1");
-
-  // Mock data
   const mockChats: Chat[] = [
     {
       id: "1",

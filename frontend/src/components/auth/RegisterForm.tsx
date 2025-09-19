@@ -36,7 +36,7 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
   };
 
   return (
-    <div className="w-full max-w-md mx-auto bg-white border-4 border-slate-900 shadow-lg">
+    <div className="w-full max-w-md mx-auto bg-white border-4 border-slate-900 shadow-[8px_8px_0px_0px_rgba(15,23,42,1)]">
       <div className="bg-coral-100 border-b-4 border-slate-900 p-6">
         <h1 className="text-2xl font-bold text-slate-900">Create Account</h1>
         <p className="text-slate-600 mt-2">Join the conversation today</p>
@@ -139,7 +139,7 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
           <button
             type="submit"
             disabled={isLoading}
-            className="w-full bg-sage-500 hover:bg-sage-600 disabled:bg-slate-300 text-white font-bold py-4 border-3 border-slate-900 transition-all duration-200 hover:translate-x-1 hover:translate-y-1 hover:shadow-none shadow-[4px_4px_0px_0px_rgba(15,23,42,1)]"
+            className="w-full bg-orange-500 hover:bg-orange-600 disabled:bg-gray-300 text-gray-100 font-bold py-4 border-2 border-gray-900 transition-all duration-200 hover:translate-x-1 hover:translate-y-1 shadow-button"
           >
             {isLoading ? "Creating Account..." : "Create Account"}
           </button>

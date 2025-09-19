@@ -66,7 +66,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   ) => {
     setAuthState((prev) => ({ ...prev, isLoading: true }));
 
-    // Simulate API call
     setTimeout(() => {
       setAuthState({
         user: null,
@@ -87,7 +86,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const verifyEmail = async (token: string) => {
     setAuthState((prev) => ({ ...prev, isLoading: true }));
 
-    // Simulate API call
     setTimeout(() => {
       setAuthState((prev) => ({ ...prev, isLoading: false }));
     }, 1000);

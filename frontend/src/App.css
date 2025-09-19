@@ -1,1 +1,15 @@
 @import "tailwindcss";
+
+@theme {
+  /* ✅ Shadows remain as raw values */
+  --shadow-button: 4px 4px 0px 0px rgba(15, 23, 42, 1);
+  --shadow-background: 8px 8px 0px 0px rgba(15, 23, 42, 1);
+
+  /* ✅ Colors in OKLCH format */
+  --color-primary: oklch(0.55 0.09 45); /* warm brown */
+  --color-bg: oklch(0.95 0.02 90); /* soft neutral background */
+  --color-text: oklch(0.2 0.02 270); /* near-black text */
+
+  /* ✅ Fonts */
+  --font-script: cursive;
+}

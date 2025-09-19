@@ -22,7 +22,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({
   };
 
   return (
-    <div className="w-full max-w-md mx-auto bg-white border-4 border-gray-900 shadow-lg">
+    <div className="w-full max-w-md mx-auto bg-white border-4 border-gray-900 shadow-background">
       {/* Header */}
       <div className="bg-orange-100 border-b-4 border-gray-900 p-6">
         <h1 className="text-2xl font-bold text-gray-900">Welcome Back</h1>
@@ -94,7 +94,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({
           <button
             type="submit"
             disabled={isLoading}
-            className="w-full bg-orange-500 hover:bg-orange-600 disabled:bg-gray-300 text-gray-100 font-bold py-4 border-2 border-gray-900 transition-all duration-200 hover:translate-x-1 hover:translate-y-1 shadow-[4px_4px_0px_0px_rgba(15,23,42,1)]"
+            className="w-full bg-orange-500 hover:bg-orange-600 disabled:bg-gray-300 text-gray-100 font-bold py-4 border-2 border-gray-900 transition-all duration-200 hover:translate-x-1 hover:translate-y-1 shadow-button"
           >
             {isLoading ? "Signing In..." : "Sign In"}
           </button>
