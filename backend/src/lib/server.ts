@@ -4,13 +4,17 @@ import cors from "cors";
 import dotenv from "dotenv";
 import { createClient, type RedisClientType } from "redis";
 import connectToDatabase from "../config";
-import userRoutes from "../routes/user.routes";
-import chatRoutes from "../routes/chat.routes";
-import messageRoutes from "../routes/message.routes";
 import { initializeSocket } from "./socket";
 import mongoose from "mongoose";
+import { authRoutes, chatRoutes, messageRoutes } from "routes";
 
 dotenv.config();
+
+export const REDIS_KEYS = {
+  accessTokenKey: "access_token_key",
+  refreshTokenKey: "refresh_token_key",
+  emailVerificationKey: "email_verification_key",
+};
 
 const app: Express = express();
 
@@ -59,7 +63,7 @@ app.use(
 );
 
 // Routes
-app.use("/api/v1/users", userRoutes);
+app.use("/api/v1/users", authRoutes);
 app.use("/api/v1/chats", chatRoutes);
 app.use("/api/v1/messages", messageRoutes);
 

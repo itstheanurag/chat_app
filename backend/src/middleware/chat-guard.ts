@@ -32,8 +32,6 @@ export const chatGuard = async (
       return sendError(res, 404, "Chat not found");
     }
 
-    // ✅ Check if user is a participant
-
     if (chat.type === "direct") {
       const isParticipant = chat.participants.some(
         (p) => p.userId.toString() === userId

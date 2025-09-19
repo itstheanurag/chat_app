@@ -1,11 +1,11 @@
 import { Router } from "express";
 import { createMessage, getMessages } from "handlers";
 import { auth } from "middleware/auth";
-const router: Router = Router();
+const messageRouter: Router = Router();
 
-router.use(auth);
+messageRouter.use(auth);
 
-router.post("/", createMessage);
-router.get("/:chatId", getMessages);
+messageRouter.post("/", createMessage);
+messageRouter.get("/:chatId", getMessages);
 
-export default router;
+export default messageRouter;

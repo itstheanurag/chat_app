@@ -2,12 +2,12 @@ import type { Request, Response } from "express";
 import jwt from "jsonwebtoken";
 import { randomInt } from "crypto";
 import { User } from "models";
-import { redisClient } from "lib/server";
+import { REDIS_KEYS, redisClient } from "lib/server";
 import { registerSchema, loginSchema, verifyEmailSchema } from "schemas";
 import { AuthenticatedRequest } from "middleware/auth";
 import { sendResponse, sendError } from "lib/response";
 import { Types } from "mongoose";
-import z from "zod";
+import { generateAccessToken, generateToken } from "lib/jwt";
 
 export const register = async (
   req: Request,
@@ -18,7 +18,7 @@ export const register = async (
 
     if (!parsedResult.success) {
       // Validation failed
-      return sendError(res, 400, parsedResult.error.format());
+      return sendError(res, 400, parsedResult.error);
     }
 
     const parsedData = parsedResult.data;
@@ -32,14 +32,19 @@ export const register = async (
     await user.save();
 
     const otp = randomInt(100000, 999999).toString();
-    console.log(otp);
+
     const verificationToken = jwt.sign(
       { userId: user._id },
       process.env.JWT_SECRET as string,
       { expiresIn: "15m" }
     );
 
-    await redisClient.setEx(`verify:${user._id}`, 15 * 60, otp);
+    await redisClient.setEx(
+      `${REDIS_KEYS.emailVerificationKey}:${user._id}`,
+      15 * 60,
+      otp
+    );
+
     console.log(`OTP for ${user.email}: ${otp}`);
 
     return sendResponse(
@@ -58,8 +63,7 @@ export const login = async (req: Request, res: Response): Promise<Response> => {
     const parsedResult = loginSchema.safeParse(req.body);
 
     if (!parsedResult.success) {
-      // Validation failed
-      return sendError(res, 400, parsedResult.error.format());
+      return sendError(res, 400, parsedResult.error);
     }
 
     const parsedData = parsedResult.data;
@@ -74,13 +78,28 @@ export const login = async (req: Request, res: Response): Promise<Response> => {
       return sendError(res, 400, "Invalid credentials");
     }
 
-    const token = jwt.sign(
-      { id: user._id, name: user.name, email: user.email },
-      process.env.JWT_SECRET as string,
-      { expiresIn: "1h" }
-    );
+    const tokens = generateToken({
+      id: (user._id as Types.ObjectId).toString(),
+      email: user.email,
+      name: user.name,
+    });
 
-    return sendResponse(res, 200, { token }, "Login successful");
+    const userDetails = {
+      id: (user._id as Types.ObjectId).toString(),
+      name: user.name,
+      email: user.email,
+      isEmailVerified: user.isEmailVerified,
+    };
+
+    return sendResponse(
+      res,
+      200,
+      {
+        ...userDetails,
+        tokens,
+      },
+      "Login successful"
+    );
   } catch (err) {
     return sendError(res, 400, err);
   }
@@ -102,9 +121,13 @@ export const verifyEmail = async (
     const decoded = jwt.verify(token, process.env.JWT_SECRET as string) as {
       userId: string;
     };
+
     const userId = decoded.userId;
 
-    const storedOtp = await redisClient.get(`verify:${userId}`);
+    const storedOtp = await redisClient.get(
+      `${REDIS_KEYS.emailVerificationKey}:${userId}`
+    );
+
     if (!storedOtp) {
       return sendError(res, 400, "OTP expired or not found");
     }
@@ -114,7 +137,7 @@ export const verifyEmail = async (
     }
 
     await User.findByIdAndUpdate(userId, { isEmailVerified: true });
-    await redisClient.del(`verify:${userId}`);
+    await redisClient.del(`${REDIS_KEYS.emailVerificationKey}:${userId}`);
 
     return sendResponse(res, 200, null, "Email verified successfully");
   } catch (err) {
@@ -158,7 +181,7 @@ export const searchUser = async (
         {
           $or: [{ name: regex }, { email: regex }],
         },
-        { _id: { $ne: userId } }, // exclude current user
+        { _id: { $ne: userId } },
       ],
     })
       .select("name email _id")
@@ -174,5 +197,50 @@ export const searchUser = async (
   } catch (err) {
     console.error("Search user error:", err);
     return sendError(res, 500, "Failed to search users");
+  }
+};
+
+export const refreshToken = async (
+  req: AuthenticatedRequest,
+  res: Response
+): Promise<Response> => {
+  try {
+    const user = req.user;
+
+    if (!user) {
+      return sendError(res, 400, "User not found");
+    }
+
+    const tokens = generateAccessToken({
+      id: user.id,
+      email: user.email,
+      name: user.name,
+    });
+
+    return sendResponse(res, 200, tokens, "Tokens refreshed successfully");
+  } catch (err) {
+    console.error("Refresh token error:", err);
+    return sendError(res, 500, "Failed to refresh token");
+  }
+};
+
+export const logout = async (
+  req: AuthenticatedRequest,
+  res: Response
+): Promise<Response> => {
+  try {
+    const user = req.user;
+
+    if (!user) {
+      return sendError(res, 400, "User not found");
+    }
+
+    await redisClient.del(`${REDIS_KEYS.accessTokenKey}:${user.id}`);
+    await redisClient.del(`${REDIS_KEYS.refreshTokenKey}:${user.id}`);
+
+    return sendResponse(res, 200, null, "Logged out successfully");
+  } catch (err) {
+    console.error("Logout error:", err);
+    return sendError(res, 500, "Failed to log out");
   }
 };

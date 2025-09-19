@@ -11,20 +11,20 @@ import {
 import { auth } from "middleware/auth";
 import { chatGuard } from "middleware/chat-guard";
 
-const router: Router = Router();
+const chatRouter: Router = Router();
 
-router.use(auth);
+chatRouter.use(auth);
 
-router.post("/", createChat);
-router.get("/", listUserChats);
-router.get("/archived", listUsersArchivedChats);
+chatRouter.post("/", createChat);
+chatRouter.get("/", listUserChats);
+chatRouter.get("/archived", listUsersArchivedChats);
 
-router.use(chatGuard);
+chatRouter.use(chatGuard);
 
-router.patch("/:chatId/archive", archiveChat);
-router.patch("/:chatId/unarchive", archiveChat);
-router.patch("/:chatId/add/participant", addUsersToGroupChat);
-router.patch("/:chatId/remove/participant", removeUsersFromGroupChat);
-router.delete("/:chatId", deleteChat);
+chatRouter.patch("/:chatId/archive", archiveChat);
+chatRouter.patch("/:chatId/unarchive", archiveChat);
+chatRouter.patch("/:chatId/add/participant", addUsersToGroupChat);
+chatRouter.patch("/:chatId/remove/participant", removeUsersFromGroupChat);
+chatRouter.delete("/:chatId", deleteChat);
 
-export default router;
+export default chatRouter;

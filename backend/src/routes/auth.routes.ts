@@ -1,0 +1,21 @@
+import { Router } from "express";
+import {
+  login,
+  register,
+  verifyEmail,
+  userLogInCheck,
+  searchUser,
+} from "handlers";
+import { auth, refreshTokenGuard } from "middleware/auth";
+const authRouter: Router = Router();
+
+authRouter.post("/register", register);
+authRouter.post("/verify-email", verifyEmail);
+authRouter.post("/login", login);
+
+authRouter.get("/me", auth, userLogInCheck);
+authRouter.get("/search", auth, searchUser);
+
+authRouter.post("/refresh", refreshTokenGuard, refreshTokenGuard);
+
+export default authRouter;
