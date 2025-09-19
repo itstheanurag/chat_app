@@ -11,7 +11,7 @@ import {
 import { auth } from "middleware/auth";
 import { chatGuard } from "middleware/chat-guard";
 
-const chatRouter: Router = Router();
+export const chatRouter: Router = Router();
 
 chatRouter.use(auth);
 
@@ -27,4 +27,4 @@ chatRouter.patch("/:chatId/add/participant", addUsersToGroupChat);
 chatRouter.patch("/:chatId/remove/participant", removeUsersFromGroupChat);
 chatRouter.delete("/:chatId", deleteChat);
 
-export default chatRouter;
+// export default chatRouter;

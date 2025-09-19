@@ -6,8 +6,10 @@ import {
   userLogInCheck,
   searchUser,
 } from "handlers";
+
 import { auth, refreshTokenGuard } from "middleware/auth";
-const authRouter: Router = Router();
+
+export const authRouter: Router = Router();
 
 authRouter.post("/register", register);
 authRouter.post("/verify-email", verifyEmail);
@@ -18,4 +20,4 @@ authRouter.get("/search", auth, searchUser);
 
 authRouter.post("/refresh", refreshTokenGuard, refreshTokenGuard);
 
-export default authRouter;
+// export default authRouter;

@@ -1,6 +1,6 @@
 import jwt, { JwtPayload } from "jsonwebtoken";
 import { JwtPayloadOptions } from "middleware/auth";
-import { redisClient } from "./server";
+import { redisClient } from "./redis";
 
 interface Tokens {
   accessToken: string;

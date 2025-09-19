@@ -2,7 +2,7 @@ import type { Request, Response } from "express";
 import jwt from "jsonwebtoken";
 import { randomInt } from "crypto";
 import { User } from "models";
-import { REDIS_KEYS, redisClient } from "lib/server";
+import { REDIS_KEYS, redisClient } from "lib/redis";
 import { registerSchema, loginSchema, verifyEmailSchema } from "schemas";
 import { AuthenticatedRequest } from "middleware/auth";
 import { sendResponse, sendError } from "lib/response";

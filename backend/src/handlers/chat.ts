@@ -1,8 +1,5 @@
 import type { Response } from "express";
-import jwt from "jsonwebtoken";
-import { randomInt } from "crypto";
-import { Chat, User } from "models";
-import { redisClient } from "lib/server";
+import { Chat } from "models";
 import { chatSchema, modifyParticipantsSchema } from "schemas";
 import { AuthenticatedRequest } from "middleware/auth";
 import { sendResponse, sendError } from "lib/response";

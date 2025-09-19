@@ -1,3 +1,3 @@
-export * as authRoutes from "./auth.routes";
-export * as chatRoutes from "./chat.routes";
-export * as messageRoutes from "./message.routes";
+export * from "./auth.routes";
+export * from "./chat.routes";
+export * from "./message.routes";

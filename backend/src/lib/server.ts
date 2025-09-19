@@ -1,38 +1,23 @@
 import express, { type Express } from "express";
 import helmet from "helmet";
-import cors from "cors";
 import dotenv from "dotenv";
-import { createClient, type RedisClientType } from "redis";
 import connectToDatabase from "../config";
 import { initializeSocket } from "./socket";
 import mongoose from "mongoose";
-import { authRoutes, chatRoutes, messageRoutes } from "routes";
+import { authRouter, chatRouter, messageRouter } from "routes";
+import { redisClient } from "./redis";
+import {
+  allowedHeaders,
+  allowedMethods,
+  allowedOrigins,
+  corsMiddleware,
+} from "./cors";
 
 dotenv.config();
-
-export const REDIS_KEYS = {
-  accessTokenKey: "access_token_key",
-  refreshTokenKey: "refresh_token_key",
-  emailVerificationKey: "email_verification_key",
-};
 
 const app: Express = express();
 
 const PORT = process.env.APP_PORT || 3000;
-
-app.use(express.json());
-app.use(express.urlencoded({ limit: "2mb", extended: true }));
-app.use(helmet());
-
-const allowedOrigins = process.env.CORS_ORIGINS?.split(",")
-  .map((o) => o.trim())
-  .filter(Boolean);
-const allowedMethods = process.env.CORS_METHODS?.split(",")
-  .map((m) => m.trim())
-  .filter(Boolean);
-const allowedHeaders = process.env.CORS_HEADERS?.split(",")
-  .map((h) => h.trim())
-  .filter(Boolean);
 
 if (
   !allowedOrigins?.length ||
@@ -43,33 +28,15 @@ if (
   process.exit(1);
 }
 
-app.use(
-  cors({
-    origin: (origin, callback) => {
-      if (
-        !origin ||
-        allowedOrigins.includes("*") ||
-        allowedOrigins.includes(origin)
-      ) {
-        callback(null, true);
-      } else {
-        callback(new Error("Not allowed by CORS"));
-      }
-    },
-    methods: allowedMethods,
-    allowedHeaders,
-    credentials: true,
-  })
-);
+app.use(express.json());
+app.use(express.urlencoded({ limit: "2mb", extended: true }));
+app.use(helmet());
+app.use(corsMiddleware);
 
 // Routes
-app.use("/api/v1/users", authRoutes);
-app.use("/api/v1/chats", chatRoutes);
-app.use("/api/v1/messages", messageRoutes);
-
-export const redisClient: RedisClientType = createClient({
-  url: process.env.REDIS_URI || "redis://localhost:6379",
-});
+app.use("/api/v1/auth", authRouter);
+app.use("/api/v1/chats", chatRouter);
+app.use("/api/v1/messages", messageRouter);
 
 export const startServer = async () => {
   await connectToDatabase();

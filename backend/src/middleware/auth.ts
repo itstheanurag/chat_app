@@ -1,7 +1,7 @@
 import type { Request, Response, NextFunction } from "express";
 import jwt, { JwtPayload } from "jsonwebtoken";
 import { sendError } from "lib/response";
-import { redisClient, REDIS_KEYS } from "lib/server";
+import { redisClient, REDIS_KEYS } from "lib/redis";
 
 export interface JwtPayloadOptions extends JwtPayload {
   id: string;
