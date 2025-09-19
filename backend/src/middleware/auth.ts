@@ -29,13 +29,13 @@ export async function auth(
   res: Response,
   next: NextFunction
 ): Promise<Response | void> {
-  const secret = process.env.JWT_SECRET;
+  const secret = process.env.JWT_ACCESS_SECRET;
   if (!secret) {
     console.error("JWT_SECRET is not configured");
     return sendError(res, 500, "Server configuration error");
   }
 
-  const authHeader = req.get("authorization");
+  const authHeader = req.get("Authorization");
   if (!authHeader?.startsWith("Bearer ")) {
     return sendError(res, 401, "Authorization token missing or invalid");
   }

@@ -78,7 +78,7 @@ export const login = async (req: Request, res: Response): Promise<Response> => {
       return sendError(res, 400, "Invalid credentials");
     }
 
-    const tokens = generateToken({
+    const tokens = await generateToken({
       id: (user._id as Types.ObjectId).toString(),
       email: user.email,
       name: user.name,

@@ -1,6 +1,6 @@
 import jwt, { JwtPayload } from "jsonwebtoken";
 import { JwtPayloadOptions } from "middleware/auth";
-import { redisClient } from "./redis";
+import { REDIS_KEYS, redisClient } from "./redis";
 
 interface Tokens {
   accessToken: string;
@@ -31,13 +31,21 @@ export async function generateToken(
   const accessTtlSeconds = 15 * 60;
   const refreshTtlSeconds = 7 * 24 * 60 * 60;
 
-  await redisClient.set(`login_access_token:${payload.id}`, accessToken, {
-    EX: accessTtlSeconds,
-  });
+  await redisClient.set(
+    `${REDIS_KEYS.accessTokenKey}:${payload.id}`,
+    accessToken,
+    {
+      EX: accessTtlSeconds,
+    }
+  );
 
-  await redisClient.set(`login_refresh_token:${payload.id}`, refreshToken, {
-    EX: refreshTtlSeconds,
-  });
+  await redisClient.set(
+    `${REDIS_KEYS.refreshTokenKey}:${payload.id}`,
+    refreshToken,
+    {
+      EX: refreshTtlSeconds,
+    }
+  );
 
   return { accessToken, refreshToken };
 }

@@ -5,6 +5,7 @@ import {
   verifyEmail,
   userLogInCheck,
   searchUser,
+  logout,
 } from "handlers";
 
 import { auth, refreshTokenGuard } from "middleware/auth";
@@ -17,6 +18,7 @@ authRouter.post("/login", login);
 
 authRouter.get("/me", auth, userLogInCheck);
 authRouter.get("/search", auth, searchUser);
+authRouter.post("/logout", auth, logout);
 
 authRouter.post("/refresh", refreshTokenGuard, refreshTokenGuard);
 

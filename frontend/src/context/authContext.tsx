@@ -4,7 +4,9 @@ import React, {
   useState,
   type ReactNode,
 } from "react";
-import type { AuthState, User } from "../types";
+import type { AuthState } from "../types";
+import { loginUser, logoutUser } from "../lib/apis/auth";
+import { toast } from "react-toastify";
 
 interface AuthContextType extends AuthState {
   login: (email: string, password: string) => Promise<void>;
@@ -41,22 +43,28 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const login = async (email: string, password: string) => {
     setAuthState((prev) => ({ ...prev, isLoading: true }));
 
-    // Simulate API call
-    setTimeout(() => {
-      const mockUser: User = {
-        id: "1",
-        email,
-        username: email.split("@")[0],
+    const result = await loginUser(email, password);
+
+    if (!result.success) {
+      toast.error(result.message);
+      setAuthState((prev) => ({ ...prev, isLoading: false }));
+      return;
+    }
+
+    const { id, email: userEmail, name } = result.data!;
+    setAuthState({
+      user: {
+        id,
+        email: userEmail,
+        username: name,
         isOnline: true,
         lastSeen: new Date(),
-      };
+      },
+      isAuthenticated: true,
+      isLoading: false,
+    });
 
-      setAuthState({
-        user: mockUser,
-        isAuthenticated: true,
-        isLoading: false,
-      });
-    }, 1000);
+    toast.success(result.message);
   };
 
   const register = async (
@@ -76,6 +84,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   };
 
   const logout = () => {
+    logoutUser();
     setAuthState({
       user: null,
       isAuthenticated: false,
