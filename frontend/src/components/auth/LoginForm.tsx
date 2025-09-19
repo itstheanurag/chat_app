@@ -1,16 +1,9 @@
 import React, { useState } from "react";
 import { Mail, Lock, Eye, EyeOff } from "lucide-react";
 import { useAuth } from "../../context/authContext";
+import Button from "../ui/Button";
 
-interface LoginFormProps {
-  onSwitchToRegister: () => void;
-  onForgotPassword: () => void;
-}
-
-export const LoginForm: React.FC<LoginFormProps> = ({
-  onSwitchToRegister,
-  onForgotPassword,
-}) => {
+export const LoginForm: React.FC = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -24,11 +17,8 @@ export const LoginForm: React.FC<LoginFormProps> = ({
   return (
     <div className="w-full max-w-md mx-auto bg-white border-4 border-gray-900 shadow-background">
       {/* Header */}
-      <div className="bg-orange-100 border-b-4 border-gray-900 p-6">
-        <h1 className="text-2xl font-bold text-gray-900">Welcome Back</h1>
-        <p className="text-gray-700 mt-2">
-          Sign in to continue your conversations
-        </p>
+      <div className="border-b-4 border-neutral-800 p-4">
+        <h1 className="text-2xl font-bold text-neutral-900">Login</h1>
       </div>
 
       {/* Form */}
@@ -81,37 +71,15 @@ export const LoginForm: React.FC<LoginFormProps> = ({
             </div>
           </div>
 
-          {/* Forgot Password */}
-          <button
-            type="button"
-            onClick={onForgotPassword}
-            className="text-sm text-orange-500 hover:text-orange-700 font-medium transition-colors"
-          >
-            Forgot your password?
-          </button>
-
           {/* Submit */}
-          <button
+          <Button
             type="submit"
             disabled={isLoading}
-            className="w-full bg-orange-500 hover:bg-orange-600 disabled:bg-gray-300 text-gray-100 font-bold py-4 border-2 border-gray-900 transition-all duration-200 hover:translate-x-1 hover:translate-y-1 shadow-button"
+            className="w-full font-mono text-neutral-50"
           >
             {isLoading ? "Signing In..." : "Sign In"}
-          </button>
+          </Button>
         </form>
-
-        {/* Switch to Register */}
-        <div className="mt-8 pt-6 border-t-2 border-gray-200">
-          <p className="text-center text-gray-700">
-            Don't have an account?{" "}
-            <button
-              onClick={onSwitchToRegister}
-              className="text-orange-500 hover:text-orange-700 font-bold underline transition-colors"
-            >
-              Create Account
-            </button>
-          </p>
-        </div>
       </div>
     </div>
   );

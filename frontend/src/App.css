@@ -1,6 +1,5 @@
 /* ✅ Import the fonts */
-@import url("https://fonts.googleapis.com/css2?family=Anta&family=Dancing+Script:wght@400..700&display=swap");
-@import url("https://fonts.googleapis.com/css2?family=Satisfy&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Audiowide&family=Satisfy&display=swap");
 
 @import "tailwindcss";
 
@@ -15,5 +14,5 @@
   --color-text: oklch(0.2 0.02 270); /* near-black text */
 
   --font-secondary: "Satisfy", cursive; /* secondary script */
-  --font-tertiary: "Anta", sans-serif; /* Anta as third font */
+  --font-tertiary: "Audiowide", sans-serif; /* Anta as third font */
 }

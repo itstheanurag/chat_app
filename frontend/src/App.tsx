@@ -1,13 +1,13 @@
 import React from "react";
 import { useAuth, AuthProvider } from "./context/authContext";
-import { AuthLayout } from "./components/layout/AuthLayout";
 import { ChatLayout } from "./components/layout/ChatLayout";
+import Home from "./components/home/Home";
 
 const AppContent: React.FC = () => {
   const { isAuthenticated, user } = useAuth();
 
   if (!isAuthenticated || !user) {
-    return <AuthLayout />;
+    return <Home />;
   }
 
   return <ChatLayout currentUser={user} />;
