@@ -35,7 +35,7 @@ export const messageSchema = z.object({
 
 export const chatSchema = z.object({
   type: z.enum(["direct", "group"]),
-  name: z.string().trim().optional(),
+  name: z.string().trim(),
   avatar: z.url().optional(),
   participants: z
     .array(

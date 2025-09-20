@@ -17,7 +17,6 @@ interface InitSocketOptions {
   allowedOrigins: string[];
   allowedMethods: string[];
   allowedHeaders: string[];
-  jwtSecret: string;
 }
 
 export function initializeSocket({
@@ -25,7 +24,6 @@ export function initializeSocket({
   allowedOrigins,
   allowedMethods,
   allowedHeaders,
-  jwtSecret,
 }: InitSocketOptions): Server {
   const io = new Server(server, {
     cors: {
@@ -37,11 +35,20 @@ export function initializeSocket({
   });
 
   io.use((socket: AuthenticatedSocket, next) => {
+    console.log(
+      `🔗 [${new Date().toISOString()}] Socket connected: ${socket.id}, ` +
+        `IP: ${socket.handshake.address}, ` +
+        `Transport: ${socket.conn.transport}`
+    );
+
+    // If you’re attaching user info after auth middleware:
+
     const token = socket.handshake.query.token as string;
     if (!token) return next(new Error("Authentication error"));
 
     try {
-      const decoded = jwt.verify(token, jwtSecret) as JwtPayloadOptions;
+      const secret: jwt.Secret = process.env.JWT_ACCESS_SECRET!;
+      const decoded = jwt.verify(token, secret) as JwtPayloadOptions;
       socket.user = decoded;
       next();
     } catch (err) {
@@ -52,6 +59,10 @@ export function initializeSocket({
 
   io.on("connection", (socket: AuthenticatedSocket) => {
     console.log(`User connected: ${socket.user?.name || "Unknown"}`);
+    if (socket.data?.user) {
+      const { id, email } = socket.data.user;
+      console.log(`👤 Authenticated user -> ID: ${id}, Email: ${email}`);
+    }
   });
 
   return io;

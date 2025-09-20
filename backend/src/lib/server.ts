@@ -53,7 +53,6 @@ export const startServer = async () => {
     allowedOrigins,
     allowedMethods,
     allowedHeaders,
-    jwtSecret: process.env.JWT_SECRET as string,
   });
 
   return { server };

@@ -1,6 +1,6 @@
 import type { Response } from "express";
 import { Chat } from "models";
-import { chatSchema, modifyParticipantsSchema } from "schemas";
+import { ChatInput, chatSchema, modifyParticipantsSchema } from "schemas";
 import { AuthenticatedRequest } from "middleware/auth";
 import { sendResponse, sendError } from "lib/response";
 import { Types } from "mongoose";
@@ -18,7 +18,7 @@ export const createChat = async (
     const parsedResult = chatSchema.safeParse(req.body);
 
     if (!parsedResult.success) {
-      return sendError(res, 400, parsedResult.error.format());
+      return sendError(res, 400, parsedResult.error);
     }
 
     const parsedData = parsedResult.data;
@@ -38,44 +38,32 @@ export const createChat = async (
         );
       }
 
-      const existingChat = await Chat.findOne({
-        type: "direct",
-        "participants.userId": { $all: allParticipants },
-        $expr: { $eq: [{ $size: "$participants" }, 2] },
+      return await handleDirectChatCreation(
+        res,
+        parsedData,
+        currentUserId,
+        allParticipants
+      );
+    } else {
+      const newChat = new Chat({
+        type,
+        name,
+        avatar,
+        participants: [
+          ...participants.filter(
+            (p) => p.userId.toString() !== currentUserId?.toString()
+          ),
+          { userId: currentUserId, joinedAt: new Date() },
+        ],
+        lastMessage,
+        isArchived: false,
+        isDeleted: false,
+        admins: [new Types.ObjectId(currentUserId)],
       });
+      await newChat.save();
 
-      if (existingChat) {
-        return sendResponse(
-          res,
-          200,
-          existingChat,
-          "Direct chat already exists"
-        );
-      }
+      return sendResponse(res, 201, newChat, "Chat created successfully");
     }
-
-    const newChat = new Chat({
-      type,
-      name: type === "group" ? name : undefined,
-      avatar,
-      participants: [
-        ...participants.filter(
-          (p) => p.userId.toString() !== currentUserId?.toString()
-        ),
-        { userId: currentUserId, joinedAt: new Date() },
-      ],
-      lastMessage,
-      isArchived: false,
-      isDeleted: false,
-    });
-
-    if (type === "group") {
-      newChat.admins = [new Types.ObjectId(currentUserId)];
-    }
-
-    await newChat.save();
-
-    return sendResponse(res, 201, newChat, "Chat created successfully");
   } catch (err: any) {
     console.error(err);
     return sendError(res, 500, err.message || "Failed to create chat");
@@ -92,7 +80,11 @@ export const listUserChats = async (
     const userChats = await Chat.find({
       isArchived: { $ne: true },
       $or: [{ "participants.userId": userId }, { admins: userId }],
-    }).sort({ updatedAt: -1 });
+    })
+      .sort({ updatedAt: -1 })
+      // Populate participants and admins with selected fields
+      .populate("participants.userId", "name email")
+      .populate("admins", "name email");
 
     return sendResponse(res, 200, userChats, "Chats retrieved successfully");
   } catch (err: any) {
@@ -280,4 +272,42 @@ export const removeUsersFromGroupChat = async (
       err.message || "Failed to remove users from chat"
     );
   }
+};
+
+const handleDirectChatCreation = async (
+  response: Response,
+  data: ChatInput,
+  userId: string,
+  allParticipants: string[]
+) => {
+  const existingChat = await Chat.findOne({
+    type: "direct",
+    "participants.userId": { $all: allParticipants },
+    $expr: { $eq: [{ $size: "$participants" }, 2] },
+  });
+
+  if (existingChat) {
+    return sendResponse(
+      response,
+      200,
+      existingChat,
+      "Direct chat already exists"
+    );
+  }
+
+  const otherparticipantId = allParticipants.find((p) => p !== userId);
+  const newChat = new Chat({
+    type: "direct",
+    name: data.name,
+    participants: [
+      { userId: otherparticipantId, joinedAt: new Date() },
+      { userId: userId, joinedAt: new Date() },
+    ],
+    lastMessage: undefined,
+    isArchived: false,
+    isDeleted: false,
+  });
+
+  await newChat.save();
+  return sendResponse(response, 201, newChat, "Chat created successfully");
 };
