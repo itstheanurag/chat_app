@@ -4,7 +4,7 @@ import dotenv from "dotenv";
 import connectToDatabase from "../config";
 import { initializeSocket } from "./socket";
 import mongoose from "mongoose";
-import { authRouter, chatRouter, messageRouter } from "routes";
+import { authRouter, chatRouter, messageRouter, userRouter } from "routes";
 import { redisClient } from "./redis";
 import {
   allowedHeaders,
@@ -35,6 +35,7 @@ app.use(corsMiddleware);
 
 // Routes
 app.use("/api/v1/auth", authRouter);
+app.use("/api/v1/user", userRouter);
 app.use("/api/v1/chats", chatRouter);
 app.use("/api/v1/messages", messageRouter);
 

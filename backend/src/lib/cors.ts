@@ -5,6 +5,7 @@ export const allowedOrigins: string[] = (process.env.CORS_ORIGINS ?? "")
   .map((o) => o.trim())
   .filter((o) => o.length > 0);
 
+console.log(allowedOrigins);
 export const allowedMethods: string[] = (process.env.CORS_METHODS ?? "")
   .split(",")
   .map((m) => m.trim())
@@ -27,7 +28,7 @@ if (
 const corsOptions: CorsOptions = {
   origin: (origin, callback) => {
     // console.log("origin", origin);
-    if (allowedOrigins.includes(origin!)) {
+    if (!origin || allowedOrigins.includes(origin!)) {
       callback(null, true);
     } else {
       callback(new Error("Not allowed by CORS"));
