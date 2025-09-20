@@ -1,9 +1,9 @@
 import React from "react";
 import { Users, Check, CheckCheck } from "lucide-react";
-import type { Chat } from "@/types";
+import type { BaseChat } from "@/types/chat";
 
 interface ChatItemProps {
-  chat: Chat;
+  chat: BaseChat;
   isSelected: boolean;
   onClick: () => void;
 }
@@ -28,13 +28,6 @@ export const ChatItem: React.FC<ChatItemProps> = ({
     }
   };
 
-  const getDisplayName = () => {
-    if (chat.isGroup) {
-      return chat.name || "Group Chat";
-    }
-    return "Direct Message";
-  };
-
   return (
     <button
       onClick={onClick}
@@ -49,13 +42,13 @@ export const ChatItem: React.FC<ChatItemProps> = ({
           {/* Avatar */}
           <div
             className={`w-12 h-12  flex items-center justify-center font-bold shadow-[2px_2px_0px_0px_rgba(163,163,163,1)] text-white shrink-0 ${
-              chat.isGroup ? "bg-green-500" : "bg-orange-500"
+              chat.type === "group" ? "bg-green-500" : "bg-orange-500"
             }`}
           >
-            {chat.isGroup ? (
+            {chat.type == "group" ? (
               <Users className="h-6 w-6" />
             ) : (
-              getDisplayName().charAt(0).toUpperCase()
+              (chat.name || "Group Chat").charAt(0).toUpperCase()
             )}
           </div>
 
@@ -63,10 +56,10 @@ export const ChatItem: React.FC<ChatItemProps> = ({
           <div className="flex-1 min-w-0 overflow-hidden">
             <div className="flex items-center justify-between gap-2 overflow-hidden">
               <h3 className="font-bold text-neutral-900 truncate max-w-[70%]">
-                {getDisplayName()}
+                {chat.name || "Group Chat"}
               </h3>
               <span className="text-xs text-neutral-500 whitespace-nowrap shrink-0">
-                {chat.lastMessage && formatTime(chat.lastMessage.timestamp)}
+                {chat.lastMessage && formatTime(chat.lastMessage.createdAt)}
               </span>
             </div>
 
@@ -74,7 +67,7 @@ export const ChatItem: React.FC<ChatItemProps> = ({
             <div className="flex items-center gap-2 mt-1 overflow-hidden">
               {chat.lastMessage && (
                 <>
-                  {chat.lastMessage.seenBy.length > 0 && (
+                  {/* {chat.lastMessage.seenBy.length > 0 && (
                     <div className="text-green-600 shrink-0">
                       {chat.lastMessage.seenBy.length === 1 ? (
                         <Check className="h-3 w-3" />
@@ -82,9 +75,9 @@ export const ChatItem: React.FC<ChatItemProps> = ({
                         <CheckCheck className="h-3 w-3" />
                       )}
                     </div>
-                  )}
+                  )} */}
                   <p className="text-sm text-neutral-600 truncate flex-1 overflow-hidden">
-                    {chat.lastMessage.content}
+                    {chat.lastMessage.text}
                   </p>
                 </>
               )}
@@ -93,11 +86,11 @@ export const ChatItem: React.FC<ChatItemProps> = ({
         </div>
 
         {/* Unread Count */}
-        {chat.unreadCount > 0 && (
+        {/* {chat.unreadCount > 0 && (
           <div className="bg-orange-500 text-white text-xs font-bold px-2 py-1 border border-neutral-900 min-w-[20px] text-center shrink-0">
             {chat.unreadCount > 99 ? "99+" : chat.unreadCount}
           </div>
-        )}
+        )} */}
       </div>
     </button>
   );

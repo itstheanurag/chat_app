@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import axios, { AxiosError } from "axios";
+import { flushLocalTokens, getToken, saveToken } from "./token";
 
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL,
@@ -28,7 +29,7 @@ const processQueue = (error: unknown, token: string | null = null) => {
   failedQueue = [];
 };
 
-// Request interceptor – attach access token if available
+// Request interceptor – attach access token
 api.interceptors.request.use(
   (config) => {
     const accessToken = localStorage.getItem("accessToken");
@@ -40,16 +41,18 @@ api.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
-// Response interceptor – handle expired token
+// Response interceptor – handle expired token (401/403)
 api.interceptors.response.use(
   (response) => response,
   async (error: AxiosError) => {
     const originalRequest: any = error.config;
 
-    // If token expired and we haven't retried yet
-    if (error.response?.status === 401 && !originalRequest._retry) {
+    // Retry only once per request
+    if (
+      (error.response?.status === 401 || error.response?.status === 403) &&
+      !originalRequest._retry
+    ) {
       if (isRefreshing) {
-        // Queue requests while refreshing
         return new Promise((resolve, reject) => {
           failedQueue.push({ resolve, reject, config: originalRequest });
         });
@@ -59,29 +62,28 @@ api.interceptors.response.use(
       isRefreshing = true;
 
       try {
-        const refreshToken = localStorage.getItem("refreshToken");
+        const refreshToken = getToken ("refreshToken");
         if (!refreshToken) {
           throw new Error("No refresh token available");
         }
 
-        // Call your refresh token endpoint
+        // Call refresh endpoint
         const { data } = await axios.post(
           `${import.meta.env.VITE_API_BASE_URL}/auth/refresh`,
           { refreshToken }
         );
 
         const newAccessToken = data.accessToken;
-        localStorage.setItem("accessToken", newAccessToken);
+        saveToken("accessToken", newAccessToken);
 
         api.defaults.headers.common.Authorization = `Bearer ${newAccessToken}`;
         processQueue(null, newAccessToken);
 
-        return api(originalRequest); // Retry failed request
+        return api(originalRequest); // Retry original request
       } catch (refreshError) {
         processQueue(refreshError, null);
-        // Optionally, clear tokens and redirect to login
-        localStorage.removeItem("accessToken");
-        localStorage.removeItem("refreshToken");
+        // Clear tokens and redirect to login
+        flushLocalTokens();
         window.location.href = "/login";
         return Promise.reject(refreshError);
       } finally {

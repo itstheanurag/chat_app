@@ -12,12 +12,13 @@ import { VerifyEmailForm } from "@/components/auth/VerifyEmail";
 import Navbar from "@/components/home/Navar";
 import { RegisterForm } from "@/components/auth/RegisterForm";
 import { LoginForm } from "@/components/auth/LoginForm";
+import { getToken } from "./lib/token";
 
 const VerifyEmailRoute: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
   const { user } = useAuth();
-  const token = localStorage.getItem("emailVerificationToken");
+  const token = getToken("emailVerificationToken");
 
   if (!user && !token) {
     return <Navigate to="/login" replace />;
@@ -48,7 +49,7 @@ const PublicLayout: React.FC<{ children: React.ReactNode }> = ({
       <Navbar />
       {children}
     </>
-  ); 
+  );
 };
 
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({

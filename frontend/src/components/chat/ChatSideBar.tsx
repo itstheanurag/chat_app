@@ -1,13 +1,12 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Search, Users, MessageCircle } from "lucide-react";
 import { ChatItem } from "./ChatItem";
-import type { Chat, User } from "@/types";
 import Button from "../ui/Button";
 import { useAuth } from "@/context/authContext";
+import { getUserChats } from "@/lib/apis/chat";
+import type { BaseChat, ChatPopulated } from "@/types/chat";
 
 interface ChatSidebarProps {
-  chats: Chat[];
-  currentUser: User | null;
   selectedChatId?: string;
   onSelectChat: (chatId: string) => void;
   onNewChat: () => void;
@@ -15,28 +14,59 @@ interface ChatSidebarProps {
 }
 
 export const ChatSidebar: React.FC<ChatSidebarProps> = ({
-  chats,
-  currentUser,
   selectedChatId,
   onSelectChat,
   onNewChat,
   onNewGroup,
 }) => {
+  const { logout, user } = useAuth();
   const [searchQuery, setSearchQuery] = useState("");
   const [menuOpen, setMenuOpen] = useState(false);
-  const { logout } = useAuth();
+  const [chats, setChats] = useState<BaseChat[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const filteredChats = chats.filter(
-    (chat) =>
-      chat.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      (!chat.isGroup && searchQuery === "")
+  // Load chats
+  useEffect(() => {
+    const fetchChats = async () => {
+      try {
+        setLoading(true);
+        const res = await getUserChats();
+        if (res.success && Array.isArray(res.data)) {
+          setChats(res.data);
+          console.log(JSON.stringify(res.data));
+        } else {
+          setChats([]);
+        }
+      } catch (err) {
+        console.error("Failed to fetch chats:", err);
+        setChats([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchChats();
+  }, []);
+
+  // Helpers
+  const getChatDisplayName = (chat: BaseChat): string => {
+    if (chat.type === "group") {
+      // Show group name if set, otherwise a generic label
+      return chat.name || `Group Chat (${chat.participants.length})`;
+    }
+
+    // Direct chat: find the participant who is NOT the current user
+    const other = chat.participants.find((p) => p.userId._id !== user?.id);
+    return other?.userId.name || "Direct Chat";
+  };
+
+  const filteredChats = chats.filter((chat) =>
+    getChatDisplayName(chat).toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   return (
-    <div className="w-80 bg-white border-r-4 border-neutral-900 flex flex-col h-full overflow-x-hidden">
-      {/* Header */}
+    <div className="w-100 bg-white border-r-4 border-neutral-900 flex flex-col h-full overflow-x-hidden">
+      {/* Search and actions */}
       <div className="bg-neutral-100 border-b-4 border-neutral-900 p-6">
-        {/* Search */}
         <div className="relative mb-4">
           <Search className="absolute left-3 top-3 h-4 w-4 text-neutral-600" />
           <input
@@ -48,7 +78,6 @@ export const ChatSidebar: React.FC<ChatSidebarProps> = ({
           />
         </div>
 
-        {/* Action Buttons */}
         <div className="flex gap-3">
           <Button
             onClick={onNewChat}
@@ -67,21 +96,23 @@ export const ChatSidebar: React.FC<ChatSidebarProps> = ({
         </div>
       </div>
 
-      {/* Chat List */}
+      {/* Chat list */}
       <div className="flex-1 overflow-y-auto">
         <div className="p-4">
-          <div className="space-y-2">
-            {filteredChats.map((chat) => (
-              <ChatItem
-                key={chat.id}
-                chat={chat}
-                isSelected={selectedChatId === chat.id}
-                onClick={() => onSelectChat(chat.id)}
-              />
-            ))}
-          </div>
-
-          {filteredChats.length === 0 && (
+          {loading ? (
+            <p className="text-center text-neutral-500 py-8">Loading chats…</p>
+          ) : filteredChats.length > 0 ? (
+            <div className="space-y-2">
+              {filteredChats.map((chat) => (
+                <ChatItem
+                  key={chat._id}
+                  chat={chat}
+                  isSelected={selectedChatId === chat._id}
+                  onClick={() => onSelectChat(chat._id)}
+                />
+              ))}
+            </div>
+          ) : (
             <div className="text-center py-12">
               <MessageCircle className="h-12 w-12 text-neutral-300 mx-auto mb-4" />
               <p className="text-neutral-600 font-medium">
@@ -95,22 +126,22 @@ export const ChatSidebar: React.FC<ChatSidebarProps> = ({
         </div>
       </div>
 
-      {/* User Profile */}
+      {/* User profile */}
       <div className="relative border-t-4 border-neutral-900 bg-white p-4">
         <div
           className="flex items-center gap-3 cursor-pointer"
           onClick={() => setMenuOpen((prev) => !prev)}
         >
           <div className="w-10 h-10 bg-green-500 border-2 border-neutral-900 flex items-center justify-center text-white font-bold shadow-button">
-            {currentUser?.username.charAt(0).toUpperCase()}
+            {(user?.username || "?").charAt(0).toUpperCase()}
           </div>
           <div className="flex-1">
             <p className="font-bold text-neutral-900">
-              {currentUser?.username}
+              {user?.username || "User"}
             </p>
-            <p className="text-sm text-neutral-600">{currentUser?.email}</p>
+            <p className="text-sm text-neutral-600">{user?.email || ""}</p>
           </div>
-          <div className="w-3 h-3 bg-green-500 border-2 border-white rounded-full"></div>
+          <div className="w-3 h-3 bg-green-500 border-2 border-white rounded-full" />
         </div>
 
         {menuOpen && (

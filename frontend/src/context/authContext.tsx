@@ -1,10 +1,11 @@
 import React, {
   createContext,
   useContext,
+  useEffect,
   useState,
   type ReactNode,
 } from "react";
-import type { AuthState } from "@/types";
+import type { AuthState, User } from "@/types";
 import {
   loginUser,
   logoutUser,
@@ -12,6 +13,7 @@ import {
   verifyUserEmail,
 } from "@/lib/apis/auth";
 import { toast } from "react-toastify";
+import { getToken, getUser, removeUser, saveUser } from "@/lib/token";
 
 interface AuthContextType extends AuthState {
   login: (email: string, password: string) => Promise<any>;
@@ -41,60 +43,66 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     isLoading: false,
   });
 
+  useEffect(() => {
+    const token = getToken("accessToken");
+    const storedUser = getUser();
+
+    if (token && storedUser) {
+      const user: User = JSON.parse(storedUser);
+      setAuthState({ user, isAuthenticated: true, isLoading: false });
+    } else {
+      setAuthState({ user: null, isAuthenticated: false, isLoading: false });
+    }
+  }, []);
+
   const login = async (email: string, password: string) => {
     setAuthState((prev) => ({ ...prev, isLoading: true }));
+    try {
+      const result = await loginUser(email, password);
 
-    const result = await loginUser(email, password);
+      if (!result.success) {
+        toast.error(result.message || "Login failed");
+        setAuthState((prev) => ({ ...prev, isLoading: false }));
+        return null;
+      }
 
-    if (!result.success) {
-      toast.error(result.message);
-      setAuthState((prev) => ({ ...prev, isLoading: false }));
-      return null;
-    }
+      const { id, email: userEmail, name, isEmailVerified } = result.data!;
 
-    const { id, email: userEmail, name, isEmailVerified } = result.data!;
-
-    setAuthState({
-      user: {
+      const user = {
         id,
         email: userEmail,
         username: name,
         isOnline: true,
         lastSeen: new Date(),
         isEmailVerified,
-      },
-      isAuthenticated: true,
-      isLoading: false,
-    });
+      };
+      saveUser(user);
 
-    toast.success(result.message);
+      setAuthState({
+        user,
+        isAuthenticated: true,
+        isLoading: false,
+      });
 
-    return result.data;
+      toast.success(result.message || "Logged in successfully");
+      return result.data;
+    } catch (err) {
+      console.error(err);
+      toast.error("Unexpected error during login");
+      setAuthState((prev) => ({ ...prev, isLoading: false }));
+      return null;
+    }
   };
 
   const register = async (email: string, password: string, name: string) => {
     setAuthState((prev) => ({ ...prev, isLoading: true }));
-
-    const result = await registerUser(email, password, name);
-
-    if (result.success) {
-      // Do NOT set user or isAuthenticated yet
-      setAuthState({
-        user: null,
-        isAuthenticated: false,
-        isLoading: false,
-      });
-    } else {
-      setAuthState({
-        user: null,
-        isAuthenticated: false,
-        isLoading: false,
-      });
-    }
+    await registerUser(email, password, name);
   };
 
   const logout = () => {
     logoutUser();
+    removeUser();
+
     setAuthState({
       user: null,
       isAuthenticated: false,
@@ -108,7 +116,13 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   return (
     <AuthContext.Provider
-      value={{ ...authState, login, register, logout, verifyEmail }}
+      value={{
+        ...authState,
+        login,
+        register,
+        logout,
+        verifyEmail,
+      }}
     >
       {children}
     </AuthContext.Provider>

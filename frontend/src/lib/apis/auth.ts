@@ -4,6 +4,7 @@ import { toast } from "react-toastify";
 import { formatApiError, extractErrorMessage } from "@/utils/formatter";
 import type { LoginResult, RegisterResponse } from "@/types/auth.type";
 import api from "../axios";
+import { flushLocalTokens, removeToken, saveToken } from "../token";
 
 export async function loginUser(
   email: string,
@@ -23,10 +24,8 @@ export async function loginUser(
     const { message = "Login successful!", data } = response.data;
 
     const tokens = data?.tokens;
-    if (tokens?.accessToken)
-      localStorage.setItem("accessToken", tokens.accessToken);
-    if (tokens?.refreshToken)
-      localStorage.setItem("refreshToken", tokens.refreshToken);
+    if (tokens?.accessToken) saveToken("accessToken", tokens.accessToken);
+    if (tokens?.refreshToken) saveToken("refreshToken", tokens.refreshToken);
 
     return { success: true, message, data };
   } catch (err: any) {
@@ -59,9 +58,7 @@ export async function logoutUser(): Promise<void> {
     );
     toast.error(formattedError);
   } finally {
-    localStorage.removeItem("accessToken");
-    localStorage.removeItem("refreshToken");
-    localStorage.removeItem("user");
+    flushLocalTokens();
   }
 }
 
@@ -93,7 +90,7 @@ export async function registerUser(
 
     const { data } = response.data;
 
-    localStorage.setItem("emailVerificationToken", data.verificationToken);
+    saveToken("emailVerificationToken", data.verificationToken);
 
     return {
       success: true,
@@ -135,7 +132,7 @@ export async function verifyUserEmail(
     toast.success(message);
 
     const { data } = response.data;
-    localStorage.removeItem("emailVerificationToken");
+    removeToken("emailVerificationToken");
     return {
       success: true,
       message,

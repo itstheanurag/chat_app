@@ -1,148 +1,78 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-
-import { toast } from "react-toastify";
+import type {
+  BaseChat,
+  CreateDirectChatResult,
+  GetUserChatsResult,
+} from "@/types/chat";
 import { formatApiError, extractErrorMessage } from "@/utils/formatter";
 import api from "../axios";
 
-export async function userChats(): Promise<any> {
+/**
+ * Fetch user chats from the backend.
+ */
+export async function getUserChats(): Promise<GetUserChatsResult> {
   try {
     const response = await api.get("/chats");
 
-    if (response.data?.success === false) {
+    // Check for explicit failure in response
+    if (!response.data?.success) {
       const formattedError = formatApiError(
-        response.data.error,
-        "Logout failed."
+        response.data?.error,
+        "Failed to retrieve chats."
       );
       return { success: false, message: formattedError };
     }
 
-    const { message = "Login successful!", data } = response.data;
-
-    const tokens = data?.tokens;
-    if (tokens?.accessToken)
-      localStorage.setItem("accessToken", tokens.accessToken);
-    if (tokens?.refreshToken)
-      localStorage.setItem("refreshToken", tokens.refreshToken);
+    const { message, data } = response.data as {
+      success: boolean;
+      message: string;
+      data: BaseChat[];
+    };
 
     return { success: true, message, data };
   } catch (err: any) {
     const formattedError = extractErrorMessage(
       err,
-      "Unexpected error during logout."
+      "Unexpected error while retrieving chats."
     );
-
     return { success: false, message: formattedError };
   }
 }
 
-export async function logoutUser(): Promise<void> {
+/**
+ * Create a direct chat between the current user and another user.
+ * @param participantId - The userId of the participant to include in the direct chat.
+ * @returns A result object containing the newly created chat or an error message.
+ */
+export async function createDirectChat(
+  participantId: string
+): Promise<CreateDirectChatResult> {
   try {
-    const response = await api.post("/auth/logout");
-
-    if (response.data?.success === false) {
-      const formattedError = formatApiError(
-        response.data.error,
-        "Logout failed."
-      );
-      toast.error(formattedError);
-    } else {
-      toast.success(response.data?.message || "Logged out successfully!");
-    }
-  } catch (err: any) {
-    const formattedError = extractErrorMessage(
-      err,
-      "Unexpected error during logout."
-    );
-    toast.error(formattedError);
-  } finally {
-    localStorage.removeItem("accessToken");
-    localStorage.removeItem("refreshToken");
-    localStorage.removeItem("user");
-  }
-}
-
-export async function registerUser(
-  email: string,
-  password: string,
-  name: string
-): Promise<RegisterResponse> {
-  try {
-    const response = await api.post("/auth/register", {
-      email,
-      password,
-      name,
+    const response = await api.post("/chats", {
+      type: "direct",
+      participants: [{ userId: participantId }],
     });
 
-    if (response.data?.success === false) {
+    if (!response.data?.success) {
       const formattedError = formatApiError(
-        response.data.error,
-        "Registration failed."
+        response.data?.error,
+        "Failed to create direct chat."
       );
-      toast.error(formattedError);
       return { success: false, message: formattedError };
     }
 
-    const message =
-      response.data?.message ||
-      "Registration triggered, please validate your email";
-    toast.success(message);
-
-    const { data } = response.data;
-
-    localStorage.setItem("emailVerificationToken", data.verificationToken);
-
-    return {
-      success: true,
-      message,
-      data: data,
+    const { message, data } = response.data as {
+      success: boolean;
+      message: string;
+      data: BaseChat;
     };
+
+    return { success: true, message, data };
   } catch (err: any) {
     const formattedError = extractErrorMessage(
       err,
-      "Unexpected error during registration."
+      "Unexpected error while creating direct chat."
     );
-    toast.error(formattedError);
-    return { success: false, message: formattedError };
-  }
-}
-
-export async function verifyUserEmail(
-  token: string,
-  otp: string
-): Promise<RegisterResponse> {
-  try {
-    const response = await api.post("/auth/verify-email", {
-      token,
-      otp,
-    });
-
-    if (response.data?.success === false) {
-      const formattedError = formatApiError(
-        response.data.error,
-        "Registration failed."
-      );
-      toast.error(formattedError);
-      return { success: false, message: formattedError };
-    }
-
-    const message =
-      response.data?.message ||
-      "Registration triggered, please validate your email";
-    toast.success(message);
-
-    const { data } = response.data;
-    localStorage.removeItem("emailVerificationToken");
-    return {
-      success: true,
-      message,
-      data: data,
-    };
-  } catch (err: any) {
-    const formattedError = extractErrorMessage(
-      err,
-      "Unexpected error during registration."
-    );
-    toast.error(formattedError);
     return { success: false, message: formattedError };
   }
 }

@@ -18,17 +18,6 @@ export interface Message {
   messageType: "text" | "image" | "file";
 }
 
-export interface Chat {
-  id: string;
-  name?: string;
-  isGroup: boolean;
-  participants: string[];
-  lastMessage?: Message;
-  unreadCount: number;
-  createdAt: Date;
-  updatedAt: Date;
-}
-
 export interface AuthState {
   user: User | null;
   isAuthenticated: boolean;
