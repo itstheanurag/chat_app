@@ -1,12 +1,11 @@
+import { useNavigate } from "react-router-dom";
 import Button from "../ui/Button";
 
-const HeroSection = ({
-  onLogin,
-  onSignup,
-}: {
-  onLogin: () => void;
-  onSignup: () => void;
-}) => {
+const HeroSection: React.FC = () => {
+  const navigate = useNavigate();
+
+  const onLogin = () => navigate("/login");
+  const onSignup = () => navigate("/register");
   return (
     <div className="relative h-screen w-full bg-gradient-to-br from-orange-50 via-white to-orange-100 flex flex-col justify-center items-center text-center px-6">
       {/* Optional: background pattern or shape */}

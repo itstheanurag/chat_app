@@ -14,14 +14,12 @@ const Button: React.FC<ButtonProps> = ({
   className = "",
   ...props
 }) => {
-  const baseStyles =
-    "bg-orange-500 hover:bg-orange-600 disabled:bg-gray-300 text-gray-100 py-2 border-2 border-gray-900 transition-all duration-200 hover:translate-x-1 hover:translate-y-1 shadow-button font-mono font-bold";
 
   return (
     <button
       type={type}
       disabled={disabled || isLoading}
-      className={cn(baseStyles, className)}
+      className={cn("bg-orange-500 hover:bg-orange-600 disabled:bg-gray-300 text-gray-100 py-2 border-2 border-gray-900 transition-all duration-200 hover:translate-x-1 hover:translate-y-1 shadow-button font-mono font-bold", className)}
       {...props}
     >
       {isLoading ? "Loading..." : children}

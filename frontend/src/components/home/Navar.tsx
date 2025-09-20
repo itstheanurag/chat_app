@@ -1,17 +1,21 @@
+import React from "react";
+import { useNavigate } from "react-router-dom";
 import Button from "../ui/Button";
 
-interface NavbarProps {
-  onHome?: () => void;
-  onLogin: () => void;
-  onSignup: () => void;
-}
+interface NavbarProps {}
 
-const Navbar: React.FC<NavbarProps> = ({ onHome, onLogin, onSignup }) => {
+const Navbar: React.FC<NavbarProps> = () => {
+  const navigate = useNavigate();
+
+  const onHome = () => navigate("/");
+  const onLogin = () => navigate("/login");
+  const onSignup = () => navigate("/register");
+
   return (
-    <nav className="w-full bg-neutral-50/70 backdrop-blur-md shadow px-6 py-3 flex justify-between items-center sticky top-0 z-50"> 
+    <nav className="w-full bg-neutral-50/70 backdrop-blur-md shadow px-6 py-3 flex justify-between items-center sticky top-0 z-50">
       <div
         onClick={onHome}
-        className="text-xl px-3 py-1 font-bold font-mono text-white bg-orange-500 border-2 border-gray-800 shadow-background"
+        className="text-xl px-3 py-1 font-bold font-mono text-white bg-orange-500 border-2 border-gray-800 shadow-background cursor-pointer"
       >
         ChatApp
       </div>

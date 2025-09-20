@@ -68,13 +68,13 @@ export async function logoutUser(): Promise<void> {
 export async function registerUser(
   email: string,
   password: string,
-  username: string
+  name: string
 ): Promise<RegisterResponse> {
   try {
     const response = await api.post("/auth/register", {
       email,
       password,
-      username,
+      name,
     });
 
     if (response.data?.success === false) {

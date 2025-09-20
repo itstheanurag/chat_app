@@ -1,18 +1,17 @@
+import { useNavigate } from "react-router-dom";
 import Button from "../ui/Button";
 import HeroSection from "./HeroSection";
 import MainCard from "./MainCard";
 
-export default function HomeContent({
-  onLogin,
-  onSignup,
-}: {
-  onLogin: () => void;
-  onSignup: () => void;
-}) {
+export default function HomeContent() {
+  const navigate = useNavigate();
+
+  const onLogin = () => navigate("/login");
+  const onSignup = () => navigate("/register");
   return (
     <main className="space-y-16">
-      <HeroSection onLogin={onLogin} onSignup={onSignup} />
-      
+      <HeroSection />
+
       <div className="mx-auto max-w-6xl space-y-16 px-4">
         {/* Main Card */}
         <MainCard />

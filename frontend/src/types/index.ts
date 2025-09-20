@@ -2,9 +2,10 @@ export interface User {
   id: string;
   email: string;
   username: string;
+  isEmailVerified: boolean;
   avatar?: string;
-  isOnline: boolean;
-  lastSeen: Date;
+  isOnline?: boolean;
+  lastSeen?: Date;
 }
 
 export interface Message {
@@ -32,5 +33,4 @@ export interface AuthState {
   user: User | null;
   isAuthenticated: boolean;
   isLoading: boolean;
-  isEmailVerified: boolean;
 }

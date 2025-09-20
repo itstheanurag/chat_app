@@ -23,7 +23,7 @@ export const RegisterForm: React.FC = () => {
   };
 
   return (
-    <div className="w-full max-w-md mx-auto bg-white border-4 border-slate-900 shadow-[8px_8px_0px_0px_rgba(15,23,42,1)]">
+    <div className="w-full mt-28 max-w-md mx-auto bg-white border-4 border-slate-900 shadow-background">
       <div className="border-b-4 border-neutral-900 p-4">
         <h1 className="text-2xl font-bold text-neutral-900">Create Account</h1>
       </div>
@@ -33,16 +33,16 @@ export const RegisterForm: React.FC = () => {
           {/* Username */}
           <div>
             <label className="block text-sm font-bold text-slate-900 mb-3">
-              Username
+              Name
             </label>
             <div className="relative">
               <User className="absolute left-4 top-4 h-5 w-5 text-slate-500" />
               <input
                 type="text"
                 value={formData.name}
-                onChange={(e) => updateFormData("username", e.target.value)}
+                onChange={(e) => updateFormData("name", e.target.value)}
                 className="w-full pl-12 pr-4 py-4 border-3 border-slate-300 focus:border-coral-500 focus:outline-none transition-colors bg-white text-slate-900"
-                placeholder="Choose a username"
+                placeholder="Choose a name"
                 required
               />
             </div>

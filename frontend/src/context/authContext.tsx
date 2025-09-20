@@ -9,14 +9,10 @@ import { loginUser, logoutUser, registerUser } from "@/lib/apis/auth";
 import { toast } from "react-toastify";
 
 interface AuthContextType extends AuthState {
-  login: (email: string, password: string) => Promise<void>;
-  register: (
-    email: string,
-    password: string,
-    username: string
-  ) => Promise<void>;
+  login: (email: string, password: string) => Promise<any>;
+  register: (email: string, password: string, name: string) => Promise<void>;
   logout: () => void;
-  verifyEmail: (token: string) => Promise<void>;
+  verifyEmail: (token: string, otp: string) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | null>(null);
@@ -38,7 +34,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     user: null,
     isAuthenticated: false,
     isLoading: false,
-    isEmailVerified: false,
   });
 
   const login = async (email: string, password: string) => {
@@ -49,7 +44,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     if (!result.success) {
       toast.error(result.message);
       setAuthState((prev) => ({ ...prev, isLoading: false }));
-      return;
+      return null;
     }
 
     const { id, email: userEmail, name, isEmailVerified } = result.data!;
@@ -61,23 +56,21 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         username: name,
         isOnline: true,
         lastSeen: new Date(),
+        isEmailVerified,
       },
       isAuthenticated: true,
       isLoading: false,
-      isEmailVerified: isEmailVerified,
     });
 
     toast.success(result.message);
+
+    return result.data;
   };
 
-  const register = async (
-    email: string,
-    password: string,
-    username: string
-  ) => {
+  const register = async (email: string, password: string, name: string) => {
     setAuthState((prev) => ({ ...prev, isLoading: true }));
 
-    const result = await registerUser(email, password, username);
+    const result = await registerUser(email, password, name);
 
     if (result.success) {
       // Do NOT set user or isAuthenticated yet
@@ -85,14 +78,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         user: null,
         isAuthenticated: false,
         isLoading: false,
-        isEmailVerified: false,
       });
     } else {
       setAuthState({
         user: null,
         isAuthenticated: false,
         isLoading: false,
-        isEmailVerified: false,
       });
     }
   };
@@ -103,7 +94,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       user: null,
       isAuthenticated: false,
       isLoading: false,
-      isEmailVerified: false,
     });
   };
 

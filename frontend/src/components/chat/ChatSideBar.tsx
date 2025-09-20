@@ -7,7 +7,7 @@ import { useAuth } from "@/context/authContext";
 
 interface ChatSidebarProps {
   chats: Chat[];
-  currentUser: User;
+  currentUser: User | null;
   selectedChatId?: string;
   onSelectChat: (chatId: string) => void;
   onNewChat: () => void;
@@ -102,11 +102,13 @@ export const ChatSidebar: React.FC<ChatSidebarProps> = ({
           onClick={() => setMenuOpen((prev) => !prev)}
         >
           <div className="w-10 h-10 bg-green-500 border-2 border-neutral-900 flex items-center justify-center text-white font-bold shadow-button">
-            {currentUser.username.charAt(0).toUpperCase()}
+            {currentUser?.username.charAt(0).toUpperCase()}
           </div>
           <div className="flex-1">
-            <p className="font-bold text-neutral-900">{currentUser.username}</p>
-            <p className="text-sm text-neutral-600">{currentUser.email}</p>
+            <p className="font-bold text-neutral-900">
+              {currentUser?.username}
+            </p>
+            <p className="text-sm text-neutral-600">{currentUser?.email}</p>
           </div>
           <div className="w-3 h-3 bg-green-500 border-2 border-white rounded-full"></div>
         </div>

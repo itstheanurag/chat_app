@@ -3,12 +3,10 @@ import { MessageSquare } from "lucide-react";
 import type { User, Chat, Message } from "@/types";
 import { ChatSidebar } from "../chat/ChatSideBar";
 import { ChatWindow } from "../chat/ChatWindow";
+import { useAuth } from "@/context/authContext";
 
-interface ChatLayoutProps {
-  currentUser: User;
-}
-
-export const ChatLayout: React.FC<ChatLayoutProps> = ({ currentUser }) => {
+export const ChatLayout: React.FC = () => {
+  const { user } = useAuth();
   const [selectedChatId, setSelectedChatId] = useState<string>("1");
   const mockChats: Chat[] = [
     {
@@ -120,7 +118,7 @@ export const ChatLayout: React.FC<ChatLayoutProps> = ({ currentUser }) => {
     <div className="h-screen bg-sage-50 flex">
       <ChatSidebar
         chats={mockChats}
-        currentUser={currentUser}
+        currentUser={user}
         selectedChatId={selectedChatId}
         onSelectChat={setSelectedChatId}
         onNewChat={() => console.log("New chat")}
@@ -131,7 +129,7 @@ export const ChatLayout: React.FC<ChatLayoutProps> = ({ currentUser }) => {
         <ChatWindow
           chat={selectedChat}
           messages={mockMessages}
-          currentUser={currentUser}
+          currentUser={user}
           onSendMessage={handleSendMessage}
           onShowGroupInfo={() => console.log("Show group info")}
         />

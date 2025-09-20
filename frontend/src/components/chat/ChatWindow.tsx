@@ -14,7 +14,7 @@ import { MessageBubble } from "./MessageBubble";
 interface ChatWindowProps {
   chat: Chat;
   messages: Message[];
-  currentUser: User;
+  currentUser: User | null;
   onSendMessage: (content: string) => void;
   onShowGroupInfo: () => void;
 }
@@ -111,7 +111,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
           <MessageBubble
             key={message.id}
             message={message}
-            isOwn={message.senderId === currentUser.id}
+            isOwn={message.senderId === currentUser?.id}
             showSeen={chat.participants.length > 1}
           />
         ))}
