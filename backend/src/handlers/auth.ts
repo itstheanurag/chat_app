@@ -33,11 +33,12 @@ export const register = async (
 
     const otp = randomInt(100000, 999999).toString();
 
-    const verificationToken = jwt.sign(
-      { userId: user._id },
-      process.env.JWT_SECRET as string,
-      { expiresIn: "15m" }
-    );
+    const emailSecret: jwt.Secret = process.env.JWT_EMAIL_SECRET!;
+    const emailExpiresIn = process.env.JWT_EMAIL_EXPIRES_IN! as unknown as any;
+
+    const verificationToken = jwt.sign({ userId: user._id }, emailSecret, {
+      expiresIn: emailExpiresIn,
+    });
 
     await redisClient.setEx(
       `${REDIS_KEYS.emailVerificationKey}:${user._id}`,
@@ -118,7 +119,10 @@ export const verifyEmail = async (
 
     const { otp, token } = parsedResult.data;
 
-    const decoded = jwt.verify(token, process.env.JWT_SECRET as string) as {
+    const decoded = jwt.verify(
+      token,
+      process.env.JWT_EMAIL_SECRET! as string
+    ) as {
       userId: string;
     };
 
