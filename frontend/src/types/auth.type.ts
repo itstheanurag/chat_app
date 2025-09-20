@@ -26,3 +26,9 @@ export interface RegisterResponse {
     verificationToken: string;
   };
 }
+
+export interface User {
+  id: string;
+  name: string;
+  email: string;
+}

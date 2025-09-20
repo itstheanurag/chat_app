@@ -62,7 +62,7 @@ api.interceptors.response.use(
       isRefreshing = true;
 
       try {
-        const refreshToken = getToken ("refreshToken");
+        const refreshToken = getToken("refreshToken");
         if (!refreshToken) {
           throw new Error("No refresh token available");
         }

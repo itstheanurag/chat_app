@@ -1,16 +1,20 @@
 import React, { useEffect, useState } from "react";
 import { MessageSquare } from "lucide-react";
-import type { User, Chat, Message } from "@/types";
 import { ChatSidebar } from "../chat/ChatSideBar";
 import { ChatWindow } from "../chat/ChatWindow";
 import { useAuth } from "@/context/authContext";
 import { connectSocket } from "@/lib/socket/socket";
 import { getToken } from "@/lib/token";
+import { getUserChats } from "@/lib/apis/chat";
+import type { BaseChat } from "@/types/chat";
 
 export const ChatLayout: React.FC = () => {
   const { user } = useAuth();
   const [selectedChatId, setSelectedChatId] = useState<string>("1");
   const [isConnected, setIsConnected] = useState(false);
+  const [chats, setChats] = useState<BaseChat[]>([]);
+  const [loading, setLoading] = useState(true);
+
   const token = getToken("accessToken");
 
   useEffect(() => {
@@ -32,30 +36,46 @@ export const ChatLayout: React.FC = () => {
     };
   }, [token]);
 
-  const mockChats: Chat[] = [];
-
-  const mockMessages: Message[] = [];
-
-  const selectedChat = mockChats.find((chat) => chat.id === selectedChatId);
+  useEffect(() => {
+    const fetchChats = async () => {
+      try {
+        setLoading(true);
+        const res = await getUserChats();
+        if (res.success && Array.isArray(res.data)) {
+          setChats(res.data);
+          console.log(JSON.stringify(res.data));
+        } else {
+          setChats([]);
+        }
+      } catch (err) {
+        console.error("Failed to fetch chats:", err);
+        setChats([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchChats();
+  }, []);
 
   const handleSendMessage = (content: string) => {
     console.log("Sending message:", content);
   };
 
+  const selectedChat = chats.find((chat) => chat._id === selectedChatId);
+
   return (
     <div className="h-screen bg-sage-50 flex">
       <ChatSidebar
-        chats={mockChats}
+        chats={chats}
         selectedChatId={selectedChatId}
         onSelectChat={setSelectedChatId}
-        onNewChat={() => console.log("New chat")}
-        onNewGroup={() => console.log("New group")}
+        isLoading={loading}
       />
 
       {selectedChat ? (
         <ChatWindow
           chat={selectedChat}
-          messages={mockMessages}
+          messages={[]}
           currentUser={user}
           onSendMessage={handleSendMessage}
           onShowGroupInfo={() => console.log("Show group info")}

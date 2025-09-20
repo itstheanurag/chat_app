@@ -1,66 +1,34 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { Search, Users, MessageCircle } from "lucide-react";
 import { ChatItem } from "./ChatItem";
 import Button from "../ui/Button";
 import { useAuth } from "@/context/authContext";
-import { getUserChats } from "@/lib/apis/chat";
-import type { BaseChat, ChatPopulated } from "@/types/chat";
+import type { BaseChat } from "@/types/chat";
+import { ChatModal } from "./createChatModal";
 
 interface ChatSidebarProps {
+  chats: BaseChat[];
   selectedChatId?: string;
   onSelectChat: (chatId: string) => void;
-  onNewChat: () => void;
-  onNewGroup: () => void;
+  isLoading: boolean;
 }
 
 export const ChatSidebar: React.FC<ChatSidebarProps> = ({
+  chats,
   selectedChatId,
   onSelectChat,
-  onNewChat,
-  onNewGroup,
+  isLoading,
 }) => {
   const { logout, user } = useAuth();
   const [searchQuery, setSearchQuery] = useState("");
   const [menuOpen, setMenuOpen] = useState(false);
-  const [chats, setChats] = useState<BaseChat[]>([]);
-  const [loading, setLoading] = useState(true);
 
+  const [modalOpen, setModalOpen] = useState(false);
+  const [modalType, setModalType] = useState<"direct" | "group">("direct");
   // Load chats
-  useEffect(() => {
-    const fetchChats = async () => {
-      try {
-        setLoading(true);
-        const res = await getUserChats();
-        if (res.success && Array.isArray(res.data)) {
-          setChats(res.data);
-          console.log(JSON.stringify(res.data));
-        } else {
-          setChats([]);
-        }
-      } catch (err) {
-        console.error("Failed to fetch chats:", err);
-        setChats([]);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchChats();
-  }, []);
-
-  // Helpers
-  const getChatDisplayName = (chat: BaseChat): string => {
-    if (chat.type === "group") {
-      // Show group name if set, otherwise a generic label
-      return chat.name || `Group Chat (${chat.participants.length})`;
-    }
-
-    // Direct chat: find the participant who is NOT the current user
-    const other = chat.participants.find((p) => p.userId._id !== user?.id);
-    return other?.userId.name || "Direct Chat";
-  };
 
   const filteredChats = chats.filter((chat) =>
-    getChatDisplayName(chat).toLowerCase().includes(searchQuery.toLowerCase())
+    chat.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   return (
@@ -80,26 +48,38 @@ export const ChatSidebar: React.FC<ChatSidebarProps> = ({
 
         <div className="flex gap-3">
           <Button
-            onClick={onNewChat}
-            className="flex-1 flex items-center justify-center gap-2 py-3 bg-orange-500 hover:bg-orange-600 text-white font-medium text-sm tracking-tighter"
+            onClick={() => {
+              setModalType("direct");
+              setModalOpen(true);
+            }}
+            className="flex-1 ..."
           >
-            <MessageCircle className="h-4 w-4" />
-            New Chat
+            <MessageCircle className="h-4 w-4" /> New Chat
           </Button>
+
           <Button
-            onClick={onNewGroup}
-            className="flex-1 flex items-center justify-center gap-2 py-3 bg-green-500 hover:bg-green-600 text-white font-medium text-sm"
+            onClick={() => {
+              setModalType("group");
+              setModalOpen(true);
+            }}
+            className="flex-1 ..."
           >
-            <Users className="h-4 w-4" />
-            New Group
+            <Users className="h-4 w-4" /> New Group
           </Button>
+
+          <ChatModal
+            isOpen={modalOpen}
+            onClose={() => setModalOpen(false)}
+            type={modalType}
+            // onChatCreated={() => fetchChats()} 
+          />
         </div>
       </div>
 
       {/* Chat list */}
       <div className="flex-1 overflow-y-auto">
         <div className="p-4">
-          {loading ? (
+          {isLoading ? (
             <p className="text-center text-neutral-500 py-8">Loading chats…</p>
           ) : filteredChats.length > 0 ? (
             <div className="space-y-2">
