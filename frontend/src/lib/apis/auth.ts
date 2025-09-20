@@ -1,28 +1,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { toast } from "react-toastify";
+import { formatApiError, extractErrorMessage } from "@/utils/formatter";
+import type { LoginResult, RegisterResponse } from "@/types/auth.type";
 import api from "../axios";
-import { formatApiError, extractErrorMessage } from "../../utils/formatter";
-
-export type ServerErrorResponse = {
-  success: false;
-  error: string | Record<string, string[]>;
-  details?: unknown;
-};
-
-export interface LoginResult {
-  success: boolean;
-  message: string;
-  data?: {
-    id: string;
-    email: string;
-    name: string;
-    tokens?: {
-      accessToken: string;
-      refreshToken: string;
-    };
-  };
-}
 
 export async function loginUser(
   email: string,
@@ -31,7 +12,6 @@ export async function loginUser(
   try {
     const response = await api.post("/auth/login", { email, password });
 
-    // If backend uses { success: false } even for 200 responses:
     if (response.data?.success === false) {
       const formattedError = formatApiError(
         response.data.error,
@@ -82,5 +62,46 @@ export async function logoutUser(): Promise<void> {
     localStorage.removeItem("accessToken");
     localStorage.removeItem("refreshToken");
     localStorage.removeItem("user");
+  }
+}
+
+export async function registerUser(
+  email: string,
+  password: string,
+  username: string
+): Promise<RegisterResponse> {
+  try {
+    const response = await api.post("/auth/register", {
+      email,
+      password,
+      username,
+    });
+
+    if (response.data?.success === false) {
+      const formattedError = formatApiError(
+        response.data.error,
+        "Registration failed."
+      );
+      toast.error(formattedError);
+      return { success: false, message: formattedError };
+    }
+
+    const message =
+      response.data?.message ||
+      "Registration triggered, please validate your email";
+    toast.success(message);
+
+    return {
+      success: true,
+      message,
+      data: response.data?.data,
+    };
+  } catch (err: any) {
+    const formattedError = extractErrorMessage(
+      err,
+      "Unexpected error during registration."
+    );
+    toast.error(formattedError);
+    return { success: false, message: formattedError };
   }
 }

@@ -1,11 +1,11 @@
 import React, { useState } from "react";
 import { Mail, Lock, User, Eye, EyeOff } from "lucide-react";
-import { useAuth } from "../../context/authContext";
+import { useAuth } from "@/context/authContext";
 import Button from "../ui/Button";
 
 export const RegisterForm: React.FC = () => {
   const [formData, setFormData] = useState({
-    username: "",
+    name: "",
     email: "",
     password: "",
   });
@@ -15,7 +15,7 @@ export const RegisterForm: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    await register(formData.email, formData.password, formData.username);
+    await register(formData.email, formData.password, formData.name);
   };
 
   const updateFormData = (field: string, value: string) => {
@@ -39,7 +39,7 @@ export const RegisterForm: React.FC = () => {
               <User className="absolute left-4 top-4 h-5 w-5 text-slate-500" />
               <input
                 type="text"
-                value={formData.username}
+                value={formData.name}
                 onChange={(e) => updateFormData("username", e.target.value)}
                 className="w-full pl-12 pr-4 py-4 border-3 border-slate-300 focus:border-coral-500 focus:outline-none transition-colors bg-white text-slate-900"
                 placeholder="Choose a username"

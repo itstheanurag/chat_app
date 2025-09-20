@@ -29,7 +29,7 @@ const Home = () => {
       {view === "login" && <LoginForm />}
       {view === "signup" && <RegisterForm />}
 
-      {view === 'home' && <Footer />}
+      {view === "home" && <Footer />}
     </>
   );
 };

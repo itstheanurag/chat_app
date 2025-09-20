@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Mail, ArrowLeft } from "lucide-react";
-import { useAuth } from "../../context/authContext";
+import { useAuth } from "@/context/authContext";
 
 interface VerifyEmailFormProps {
   onBackToLogin: () => void;

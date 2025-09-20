@@ -4,8 +4,8 @@ import React, {
   useState,
   type ReactNode,
 } from "react";
-import type { AuthState } from "../types";
-import { loginUser, logoutUser } from "../lib/apis/auth";
+import type { AuthState } from "@/types";
+import { loginUser, logoutUser, registerUser } from "@/lib/apis/auth";
 import { toast } from "react-toastify";
 
 interface AuthContextType extends AuthState {
@@ -38,6 +38,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     user: null,
     isAuthenticated: false,
     isLoading: false,
+    isEmailVerified: false,
   });
 
   const login = async (email: string, password: string) => {
@@ -51,7 +52,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       return;
     }
 
-    const { id, email: userEmail, name } = result.data!;
+    const { id, email: userEmail, name, isEmailVerified } = result.data!;
+
     setAuthState({
       user: {
         id,
@@ -62,6 +64,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       },
       isAuthenticated: true,
       isLoading: false,
+      isEmailVerified: isEmailVerified,
     });
 
     toast.success(result.message);
@@ -74,13 +77,24 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   ) => {
     setAuthState((prev) => ({ ...prev, isLoading: true }));
 
-    setTimeout(() => {
+    const result = await registerUser(email, password, username);
+
+    if (result.success) {
+      // Do NOT set user or isAuthenticated yet
       setAuthState({
         user: null,
         isAuthenticated: false,
         isLoading: false,
+        isEmailVerified: false,
       });
-    }, 1000);
+    } else {
+      setAuthState({
+        user: null,
+        isAuthenticated: false,
+        isLoading: false,
+        isEmailVerified: false,
+      });
+    }
   };
 
   const logout = () => {
@@ -89,6 +103,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       user: null,
       isAuthenticated: false,
       isLoading: false,
+      isEmailVerified: false,
     });
   };
 

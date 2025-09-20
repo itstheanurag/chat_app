@@ -1,6 +1,6 @@
 import React from "react";
 import { Users, Check, CheckCheck } from "lucide-react";
-import type { Chat } from "../../types";
+import type { Chat } from "@/types";
 
 interface ChatItemProps {
   chat: Chat;

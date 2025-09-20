@@ -1,9 +1,9 @@
 import React, { useState } from "react";
-import { Search, Plus, Users, MessageCircle, Settings } from "lucide-react";
+import { Search, Users, MessageCircle } from "lucide-react";
 import { ChatItem } from "./ChatItem";
-import type { Chat, User } from "../../types";
+import type { Chat, User } from "@/types";
 import Button from "../ui/Button";
-import { useAuth } from "../../context/authContext";
+import { useAuth } from "@/context/authContext";
 
 interface ChatSidebarProps {
   chats: Chat[];

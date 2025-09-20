@@ -1,6 +1,6 @@
 import React from "react";
 import { Check, CheckCheck } from "lucide-react";
-import type { Message } from "../../types";
+import type { Message } from "@/types";
 
 interface MessageBubbleProps {
   message: Message;

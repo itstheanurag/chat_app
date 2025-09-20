@@ -1,5 +1,5 @@
+import { cn } from "@/utils/cn";
 import React from "react";
-import { twMerge } from "tailwind-merge";
 
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   isLoading?: boolean;
@@ -21,7 +21,7 @@ const Button: React.FC<ButtonProps> = ({
     <button
       type={type}
       disabled={disabled || isLoading}
-      className={twMerge(baseStyles, className)}
+      className={cn(baseStyles, className)}
       {...props}
     >
       {isLoading ? "Loading..." : children}

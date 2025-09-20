@@ -8,7 +8,7 @@ import {
   Phone,
   Video,
 } from "lucide-react";
-import type { Chat, Message, User } from "../../types";
+import type { Chat, Message, User } from "@/types";
 import { MessageBubble } from "./MessageBubble";
 
 interface ChatWindowProps {

@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { MessageSquare } from "lucide-react";
-import type { User, Chat, Message } from "../../types";
+import type { User, Chat, Message } from "@/types";
 import { ChatSidebar } from "../chat/ChatSideBar";
 import { ChatWindow } from "../chat/ChatWindow";
 

@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Mail, Lock, Eye, EyeOff } from "lucide-react";
-import { useAuth } from "../../context/authContext";
+import { useAuth } from "@/context/authContext";
 import Button from "../ui/Button";
 
 export const LoginForm: React.FC = () => {

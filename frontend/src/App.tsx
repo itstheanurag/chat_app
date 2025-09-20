@@ -1,7 +1,7 @@
 import React from "react";
-import { useAuth, AuthProvider } from "./context/authContext";
-import { ChatLayout } from "./components/layout/ChatLayout";
-import Home from "./components/home/Home";
+import { useAuth, AuthProvider } from "@/context/authContext";
+import { ChatLayout } from "@/components/layout/ChatLayout";
+import Home from "@/components/home/Home";
 
 const AppContent: React.FC = () => {
   const { isAuthenticated, user } = useAuth();
