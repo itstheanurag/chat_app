@@ -3,7 +3,12 @@ import jwt from "jsonwebtoken";
 import { randomInt } from "crypto";
 import { User } from "models";
 import { REDIS_KEYS, redisClient } from "lib/redis";
-import { registerSchema, loginSchema, verifyEmailSchema } from "schemas";
+import {
+  registerSchema,
+  loginSchema,
+  verifyEmailSchema,
+  tokenSchema,
+} from "schemas";
 import { AuthenticatedRequest } from "middleware/auth";
 import { sendResponse, sendError } from "lib/response";
 import { Types } from "mongoose";
@@ -36,9 +41,13 @@ export const register = async (
     const emailSecret: jwt.Secret = process.env.JWT_EMAIL_SECRET!;
     const emailExpiresIn = process.env.JWT_EMAIL_EXPIRES_IN! as unknown as any;
 
-    const verificationToken = jwt.sign({ userId: user._id }, emailSecret, {
-      expiresIn: emailExpiresIn,
-    });
+    const verificationToken = jwt.sign(
+      { userId: user._id, email: user.email },
+      emailSecret,
+      {
+        expiresIn: emailExpiresIn,
+      }
+    );
 
     await redisClient.setEx(
       `${REDIS_KEYS.emailVerificationKey}:${user._id}`,
@@ -101,49 +110,6 @@ export const login = async (req: Request, res: Response): Promise<Response> => {
       },
       "Login successful"
     );
-  } catch (err) {
-    return sendError(res, 400, err);
-  }
-};
-
-export const verifyEmail = async (
-  req: Request,
-  res: Response
-): Promise<Response> => {
-  try {
-    const parsedResult = verifyEmailSchema.safeParse(req.body);
-
-    if (!parsedResult.success) {
-      return sendError(res, 400, parsedResult.error);
-    }
-
-    const { otp, token } = parsedResult.data;
-
-    const decoded = jwt.verify(
-      token,
-      process.env.JWT_EMAIL_SECRET! as string
-    ) as {
-      userId: string;
-    };
-
-    const userId = decoded.userId;
-
-    const storedOtp = await redisClient.get(
-      `${REDIS_KEYS.emailVerificationKey}:${userId}`
-    );
-
-    if (!storedOtp) {
-      return sendError(res, 400, "OTP expired or not found");
-    }
-
-    if (storedOtp !== otp) {
-      return sendError(res, 400, "Invalid OTP");
-    }
-
-    await User.findByIdAndUpdate(userId, { isEmailVerified: true });
-    await redisClient.del(`${REDIS_KEYS.emailVerificationKey}:${userId}`);
-
-    return sendResponse(res, 200, null, "Email verified successfully");
   } catch (err) {
     return sendError(res, 400, err);
   }
@@ -246,5 +212,83 @@ export const logout = async (
   } catch (err) {
     console.error("Logout error:", err);
     return sendError(res, 500, "Failed to log out");
+  }
+};
+
+/**
+ *  OTP RELATED AND EMAIL VERIFICATION RELATED CODE
+ */
+
+export const resendEmailVerificationToken = async (
+  req: Request,
+  res: Response
+): Promise<Response> => {
+  try {
+    const parsedResult = tokenSchema.safeParse(req.body);
+    if (!parsedResult.success) {
+      return sendError(res, 400, parsedResult.error);
+    }
+    const { token } = req.body;
+    const decoded = jwt.verify(
+      token,
+      process.env.JWT_EMAIL_SECRET! as string
+    ) as { userId: string; email: string };
+
+    const { userId, email } = decoded;
+    await redisClient.del(`${REDIS_KEYS.emailVerificationKey}:${userId}`);
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    await redisClient.setEx(
+      `${REDIS_KEYS.emailVerificationKey}:${userId}`,
+      15 * 60,
+      otp
+    );
+    // sendEmail(user.email, `Your verification code is ${otp}`);
+    console.log(email, `Your verification code is ${otp}`);
+    return sendResponse(res, 200, { token, otp }, "Verification OTP resent");
+  } catch (err) {
+    return sendError(res, 500, err);
+  }
+};
+
+export const verifyEmail = async (
+  req: Request,
+  res: Response
+): Promise<Response> => {
+  try {
+    const parsedResult = verifyEmailSchema.safeParse(req.body);
+
+    if (!parsedResult.success) {
+      return sendError(res, 400, parsedResult.error);
+    }
+
+    const { otp, token } = parsedResult.data;
+
+    const decoded = jwt.verify(
+      token,
+      process.env.JWT_EMAIL_SECRET! as string
+    ) as {
+      userId: string;
+    };
+
+    const userId = decoded.userId;
+
+    const storedOtp = await redisClient.get(
+      `${REDIS_KEYS.emailVerificationKey}:${userId}`
+    );
+
+    if (!storedOtp) {
+      return sendError(res, 400, "OTP expired or not found");
+    }
+
+    if (storedOtp !== otp) {
+      return sendError(res, 400, "Invalid OTP");
+    }
+
+    await User.findByIdAndUpdate(userId, { isEmailVerified: true });
+    await redisClient.del(`${REDIS_KEYS.emailVerificationKey}:${userId}`);
+
+    return sendResponse(res, 200, null, "Email verified successfully");
+  } catch (err) {
+    return sendError(res, 400, err);
   }
 };

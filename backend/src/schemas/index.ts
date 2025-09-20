@@ -66,6 +66,10 @@ export const modifyParticipantsSchema = z.object({
   userIds: z.array(z.string()).nonempty("At least one user ID is required"),
 });
 
+export const tokenSchema = z.object({
+  token: z.string(),
+});
+
 export type MessageInput = z.infer<typeof messageSchema>;
 export type ChatInput = z.infer<typeof chatSchema>;
 

@@ -6,6 +6,7 @@ import {
   userLogInCheck,
   searchUser,
   logout,
+  resendEmailVerificationToken,
 } from "handlers";
 
 import { auth, refreshTokenGuard } from "middleware/auth";
@@ -21,5 +22,5 @@ authRouter.get("/search", auth, searchUser);
 authRouter.post("/logout", auth, logout);
 
 authRouter.post("/refresh", refreshTokenGuard, refreshTokenGuard);
-
+authRouter.post("/resend-otp", resendEmailVerificationToken);
 // export default authRouter;
