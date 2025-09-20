@@ -91,10 +91,55 @@ export async function registerUser(
       "Registration triggered, please validate your email";
     toast.success(message);
 
+    const { data } = response.data;
+
+    localStorage.setItem("emailVerificationToken", data.verificationToken);
+
     return {
       success: true,
       message,
-      data: response.data?.data,
+      data: data,
+    };
+  } catch (err: any) {
+    const formattedError = extractErrorMessage(
+      err,
+      "Unexpected error during registration."
+    );
+    toast.error(formattedError);
+    return { success: false, message: formattedError };
+  }
+}
+
+export async function verifyUserEmail(
+  token: string,
+  otp: string
+): Promise<RegisterResponse> {
+  try {
+    const response = await api.post("/auth/verify-email", {
+      token,
+      otp,
+    });
+
+    if (response.data?.success === false) {
+      const formattedError = formatApiError(
+        response.data.error,
+        "Registration failed."
+      );
+      toast.error(formattedError);
+      return { success: false, message: formattedError };
+    }
+
+    const message =
+      response.data?.message ||
+      "Registration triggered, please validate your email";
+    toast.success(message);
+
+    const { data } = response.data;
+    localStorage.removeItem("emailVerificationToken");
+    return {
+      success: true,
+      message,
+      data: data,
     };
   } catch (err: any) {
     const formattedError = extractErrorMessage(

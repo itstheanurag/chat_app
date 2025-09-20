@@ -17,12 +17,10 @@ export const LoginForm: React.FC = () => {
   };
 
   useEffect(() => {
-    if (isAuthenticated && user?.isEmailVerified) {
+    if (isAuthenticated) {
       navigate("/chat", { replace: true });
-    } else if (isAuthenticated && !user?.isEmailVerified) {
-      navigate("/verify-email", { replace: true });
     }
-  }, [isAuthenticated, user, navigate]);
+  }, [user]);
 
   return (
     <div className="mt-28 flex justify-center items-center bg-gray-50">

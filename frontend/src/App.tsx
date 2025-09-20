@@ -13,21 +13,50 @@ import Navbar from "@/components/home/Navar";
 import { RegisterForm } from "@/components/auth/RegisterForm";
 import { LoginForm } from "@/components/auth/LoginForm";
 
+const VerifyEmailRoute: React.FC<{ children: React.ReactNode }> = ({
+  children,
+}) => {
+  const { user } = useAuth();
+  const token = localStorage.getItem("emailVerificationToken");
+
+  if (!user && !token) {
+    return <Navigate to="/login" replace />;
+  }
+
+  if (user?.isEmailVerified) {
+    return <Navigate to="/chat" replace />;
+  }
+
+  return <>{children}</>;
+};
+
 const PublicLayout: React.FC<{ children: React.ReactNode }> = ({
   children,
-}) => (
-  <>
-    <Navbar />
-    {children}
-  </>
-);
+}) => {
+  const { isAuthenticated, user } = useAuth();
+
+  if (isAuthenticated && user?.isEmailVerified) {
+    return <Navigate to="/chat" replace />;
+  }
+
+  if (isAuthenticated && !user?.isEmailVerified) {
+    return <Navigate to="/verify-email" replace />;
+  }
+
+  return (
+    <>
+      <Navbar />
+      {children}
+    </>
+  ); 
+};
 
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
   const { isAuthenticated, user } = useAuth();
   if (!isAuthenticated) return <Navigate to="/" />;
-  if (user && !user.isEmailVerified) return <Navigate to="/verify-email" />;
+  if (!user?.isEmailVerified) return <Navigate to="/verify-email" />;
   return <>{children}</>;
 };
 
@@ -48,11 +77,12 @@ const AppContent: React.FC = () => {
         path="/verify-email"
         element={
           <PublicLayout>
-            <VerifyEmailForm />
+            <VerifyEmailRoute>
+              <VerifyEmailForm />
+            </VerifyEmailRoute>
           </PublicLayout>
         }
       />
-
       <Route
         path="/login"
         element={

@@ -5,7 +5,12 @@ import React, {
   type ReactNode,
 } from "react";
 import type { AuthState } from "@/types";
-import { loginUser, logoutUser, registerUser } from "@/lib/apis/auth";
+import {
+  loginUser,
+  logoutUser,
+  registerUser,
+  verifyUserEmail,
+} from "@/lib/apis/auth";
 import { toast } from "react-toastify";
 
 interface AuthContextType extends AuthState {
@@ -97,12 +102,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     });
   };
 
-  const verifyEmail = async (token: string) => {
-    setAuthState((prev) => ({ ...prev, isLoading: true }));
-
-    setTimeout(() => {
-      setAuthState((prev) => ({ ...prev, isLoading: false }));
-    }, 1000);
+  const verifyEmail = async (token: string, otp: string) => {
+    await verifyUserEmail(token, otp);
   };
 
   return (
