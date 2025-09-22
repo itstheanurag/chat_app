@@ -16,10 +16,13 @@ export const getToken = (type: TokenType): string | null => {
  * @param type - The token type to save.
  * @param value - The token value to store.
  */
-export const saveToken = (type: TokenType, value: string): void => {
-  localStorage.setItem(type, value);
+export const saveToken = (key: string, token: string | null) => {
+  if (!token) {
+    console.warn("Trying to save undefined token for", key);
+    return;
+  }
+  localStorage.setItem(key, token);
 };
-
 /**
  * Remove a token from localStorage.
  * @param type - The token type to remove.
@@ -32,6 +35,7 @@ export const flushLocalTokens = () => {
   removeToken("accessToken");
   removeToken("refreshToken");
   removeToken("emailVerificationToken");
+  removeUser();
 };
 
 export const saveUser = (user: User) => {

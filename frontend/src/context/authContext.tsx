@@ -13,7 +13,7 @@ import {
   verifyUserEmail,
 } from "@/lib/apis/auth";
 import { toast } from "react-toastify";
-import { getToken, getUser, removeUser, saveUser } from "@/lib/token";
+import { getToken, getUser, removeUser, saveUser } from "@/lib/storage";
 
 interface AuthContextType extends AuthState {
   login: (email: string, password: string) => Promise<any>;

@@ -12,7 +12,7 @@ import { VerifyEmailForm } from "@/components/auth/VerifyEmail";
 import Navbar from "@/components/home/Navar";
 import { RegisterForm } from "@/components/auth/RegisterForm";
 import { LoginForm } from "@/components/auth/LoginForm";
-import { getToken } from "./lib/token";
+import { getToken } from "./lib/storage";
 
 const VerifyEmailRoute: React.FC<{ children: React.ReactNode }> = ({
   children,

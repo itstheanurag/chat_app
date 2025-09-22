@@ -28,22 +28,18 @@ export const ChatSidebar: React.FC<ChatSidebarProps> = ({
         const res = await getUserChats();
         if (res.success && Array.isArray(res.data)) {
           setChats(res.data);
-
           if (res.data.length > 0) {
             onSelectChat(res.data[0]._id);
           }
-        } else {
-          setChats([]);
         }
       } catch (err) {
         console.error("Failed to fetch chats:", err);
-        setChats([]);
       } finally {
         setLoading(false);
       }
     };
     fetchChats();
-  }, []);
+  }, [user]);
 
   return (
     <div className="w-100 bg-white border-r-4 border-neutral-900 flex flex-col h-full overflow-x-hidden">

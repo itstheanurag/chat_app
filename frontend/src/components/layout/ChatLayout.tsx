@@ -4,7 +4,7 @@ import { ChatSidebar } from "../chat/ChatSideBar";
 import { ChatWindow } from "../chat/ChatWindow";
 import { useAuth } from "@/context/authContext";
 import { connectSocket } from "@/lib/socket/socket";
-import { getToken } from "@/lib/token";
+import { getToken } from "@/lib/storage";
 
 export const ChatLayout: React.FC = () => {
   const { user } = useAuth();
@@ -16,10 +16,7 @@ export const ChatLayout: React.FC = () => {
   useEffect(() => {
     if (!token) return;
     const socket = connectSocket(token);
-
     socket.on("connect", () => setIsConnected(true));
-
-    // Example: listen for incoming messages
     socket.on("message", (msg) => {
       console.log("📩 New message:", msg);
     });
@@ -32,10 +29,6 @@ export const ChatLayout: React.FC = () => {
     };
   }, [token]);
 
-  const handleSendMessage = (content: string) => {
-    console.log("Sending message:", content);
-  };
-
   return (
     <div className="h-screen bg-sage-50 flex">
       <ChatSidebar
@@ -46,8 +39,6 @@ export const ChatLayout: React.FC = () => {
       {selectedChatId ? (
         <ChatWindow
           chatId={selectedChatId}
-          currentUser={user}
-          onSendMessage={handleSendMessage}
           onShowGroupInfo={() => console.log("Show group info")}
         />
       ) : (

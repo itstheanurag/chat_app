@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import axios, { AxiosError } from "axios";
-import { flushLocalTokens, getToken, saveToken } from "./token";
+import { flushLocalTokens, getToken, saveToken } from "./storage";
 
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL,
@@ -32,7 +32,7 @@ const processQueue = (error: unknown, token: string | null = null) => {
 // Request interceptor – attach access token
 api.interceptors.request.use(
   (config) => {
-    const accessToken = localStorage.getItem("accessToken");
+    const accessToken = getToken("accessToken");
     if (accessToken) {
       config.headers.Authorization = `Bearer ${accessToken}`;
     }
@@ -70,7 +70,7 @@ api.interceptors.response.use(
         // Call refresh endpoint
         const { data } = await axios.post(
           `${import.meta.env.VITE_API_BASE_URL}/auth/refresh`,
-          { refreshToken }
+          { token: refreshToken }
         );
 
         const newAccessToken = data.accessToken;
@@ -79,12 +79,11 @@ api.interceptors.response.use(
         api.defaults.headers.common.Authorization = `Bearer ${newAccessToken}`;
         processQueue(null, newAccessToken);
 
-        return api(originalRequest); // Retry original request
+        return api(originalRequest);
       } catch (refreshError) {
         processQueue(refreshError, null);
-        // Clear tokens and redirect to login
-        flushLocalTokens();
         window.location.href = "/login";
+        flushLocalTokens();
         return Promise.reject(refreshError);
       } finally {
         isRefreshing = false;

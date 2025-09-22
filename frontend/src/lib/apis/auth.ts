@@ -4,7 +4,7 @@ import { toast } from "react-toastify";
 import { formatApiError, extractErrorMessage } from "@/utils/formatter";
 import type { LoginResult, RegisterResponse } from "@/types/auth.type";
 import api from "../axios";
-import { flushLocalTokens, removeToken, saveToken } from "../token";
+import { flushLocalTokens, removeToken, saveToken } from "../storage";
 
 export async function loginUser(
   email: string,
@@ -22,7 +22,6 @@ export async function loginUser(
     }
 
     const { message = "Login successful!", data } = response.data;
-
     const tokens = data?.tokens;
     if (tokens?.accessToken) saveToken("accessToken", tokens.accessToken);
     if (tokens?.refreshToken) saveToken("refreshToken", tokens.refreshToken);

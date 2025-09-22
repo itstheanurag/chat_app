@@ -12,10 +12,6 @@ export interface LoginResult {
     email: string;
     name: string;
     isEmailVerified: boolean;
-    tokens?: {
-      accessToken: string;
-      refreshToken: string;
-    };
   };
 }
 
