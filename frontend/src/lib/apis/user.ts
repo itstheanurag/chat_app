@@ -7,7 +7,7 @@ export async function searchUsers(
   q: string
 ): Promise<{ success: boolean; data?: User[]; message?: string }> {
   try {
-    const response = await api.get("/users/search", {
+    const response = await api.get("/user/search", {
       params: { q }, // <-- corrected here
     });
 

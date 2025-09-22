@@ -13,7 +13,8 @@ export const ChatItem: React.FC<ChatItemProps> = ({
   isSelected,
   onClick,
 }) => {
-  const formatTime = (date: Date) => {
+  const formatTime = (date?: Date) => {
+    if (!date) return "";
     const now = new Date();
     const diff = now.getTime() - date.getTime();
     const hours = Math.floor(diff / (1000 * 60 * 60));
@@ -48,7 +49,7 @@ export const ChatItem: React.FC<ChatItemProps> = ({
             {chat.type == "group" ? (
               <Users className="h-6 w-6" />
             ) : (
-              (chat.name || "Group Chat").charAt(0).toUpperCase()
+              (chat.name || "Group Chat")?.charAt(0).toUpperCase()
             )}
           </div>
 
@@ -59,7 +60,7 @@ export const ChatItem: React.FC<ChatItemProps> = ({
                 {chat.name || "Group Chat"}
               </h3>
               <span className="text-xs text-neutral-500 whitespace-nowrap shrink-0">
-                {chat.lastMessage && formatTime(chat.lastMessage.createdAt)}
+                {chat.lastMessage && formatTime(chat.lastMessage?.createdAt)}
               </span>
             </div>
 

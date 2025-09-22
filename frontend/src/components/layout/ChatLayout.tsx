@@ -43,7 +43,9 @@ export const ChatLayout: React.FC = () => {
         const res = await getUserChats();
         if (res.success && Array.isArray(res.data)) {
           setChats(res.data);
-          console.log(JSON.stringify(res.data));
+          if (res.data.length > 0) {
+            setSelectedChatId(res.data[0]._id);
+          }
         } else {
           setChats([]);
         }
@@ -69,7 +71,7 @@ export const ChatLayout: React.FC = () => {
         chats={chats}
         selectedChatId={selectedChatId}
         onSelectChat={setSelectedChatId}
-        isLoading={loading}
+        rerenderRequired={isRenderRequired}
       />
 
       {selectedChat ? (

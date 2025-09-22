@@ -8,11 +8,12 @@ import {
   Phone,
   Video,
 } from "lucide-react";
-import type { Chat, Message, User } from "@/types";
+import type { Message, User } from "@/types";
 import { MessageBubble } from "./MessageBubble";
+import type { BaseChat } from "@/types/chat";
 
 interface ChatWindowProps {
-  chat: Chat;
+  chat: BaseChat;
   messages: Message[];
   currentUser: User | null;
   onSendMessage: (content: string) => void;
@@ -46,13 +47,6 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
     }
   };
 
-  const getDisplayName = () => {
-    if (chat.isGroup) {
-      return chat.name || "Group Chat";
-    }
-    return "Direct Message";
-  };
-
   return (
     <div className="flex-1 flex flex-col h-full bg-white">
       {/* Chat Header */}
@@ -61,22 +55,22 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
           <div className="flex items-center gap-4">
             <div
               className={`w-12 h-12 border-3 border-slate-900 flex items-center justify-center font-bold text-white ${
-                chat.isGroup ? "bg-navy-500" : "bg-coral-500"
+                chat.type === "group" ? "bg-navy-500" : "bg-coral-500"
               }`}
             >
-              {chat.isGroup ? (
+              {chat.type === "group" ? (
                 <Users className="h-6 w-6" />
               ) : (
-                getDisplayName().charAt(0).toUpperCase()
+                (chat.name || "Group Chat")?.charAt(0).toUpperCase()
               )}
             </div>
 
             <div>
               <h2 className="text-xl font-bold text-slate-900">
-                {getDisplayName()}
+                {(chat.name || "Group Chat")?.charAt(0).toUpperCase()}
               </h2>
               <p className="text-sm text-slate-600">
-                {chat.isGroup
+                {chat.type === "group"
                   ? `${chat.participants.length} members`
                   : "Online"}
               </p>
@@ -90,7 +84,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
             <button className="p-3 text-slate-600 hover:text-slate-900 hover:bg-white border-2 border-transparent hover:border-slate-300 transition-all">
               <Video className="h-5 w-5" />
             </button>
-            {chat.isGroup && (
+            {chat.type === "group" && (
               <button
                 onClick={onShowGroupInfo}
                 className="p-3 text-slate-600 hover:text-slate-900 hover:bg-white border-2 border-transparent hover:border-slate-300 transition-all"

@@ -10,51 +10,33 @@ interface ChatSidebarProps {
   chats: BaseChat[];
   selectedChatId?: string;
   onSelectChat: (chatId: string) => void;
-  isLoading: boolean;
 }
 
 export const ChatSidebar: React.FC<ChatSidebarProps> = ({
   chats,
   selectedChatId,
   onSelectChat,
-  isLoading,
 }) => {
   const { logout, user } = useAuth();
-  const [searchQuery, setSearchQuery] = useState("");
   const [menuOpen, setMenuOpen] = useState(false);
 
   const [modalOpen, setModalOpen] = useState(false);
   const [modalType, setModalType] = useState<"direct" | "group">("direct");
-  // Load chats
-
-  const filteredChats = chats.filter((chat) =>
-    chat.name.toLowerCase().includes(searchQuery.toLowerCase())
-  );
 
   return (
     <div className="w-100 bg-white border-r-4 border-neutral-900 flex flex-col h-full overflow-x-hidden">
       {/* Search and actions */}
       <div className="bg-neutral-100 border-b-4 border-neutral-900 p-6">
-        <div className="relative mb-4">
-          <Search className="absolute left-3 top-3 h-4 w-4 text-neutral-600" />
-          <input
-            type="text"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-10 pr-4 py-3 border-2 border-neutral-300 focus:border-orange-500 focus:outline-none transition-colors bg-white text-neutral-900"
-            placeholder="Search conversations..."
-          />
-        </div>
-
-        <div className="flex gap-3">
+        <div className="flex items-center justify-center gap-3">
           <Button
             onClick={() => {
               setModalType("direct");
               setModalOpen(true);
             }}
-            className="flex-1 ..."
+            className="flex-1 flex items-center justify-center gap-2"
           >
-            <MessageCircle className="h-4 w-4" /> New Chat
+            <MessageCircle className="h-4 w-4" />
+            New Chat
           </Button>
 
           <Button
@@ -62,16 +44,17 @@ export const ChatSidebar: React.FC<ChatSidebarProps> = ({
               setModalType("group");
               setModalOpen(true);
             }}
-            className="flex-1 ..."
+            className="flex-1 flex items-center justify-center gap-2"
           >
-            <Users className="h-4 w-4" /> New Group
+            <Users className="h-4 w-4" />
+            New Group
           </Button>
 
           <ChatModal
             isOpen={modalOpen}
             onClose={() => setModalOpen(false)}
             type={modalType}
-            // onChatCreated={() => fetchChats()} 
+            onChatCreated={() => fetchChats()}
           />
         </div>
       </div>
@@ -79,14 +62,12 @@ export const ChatSidebar: React.FC<ChatSidebarProps> = ({
       {/* Chat list */}
       <div className="flex-1 overflow-y-auto">
         <div className="p-4">
-          {isLoading ? (
-            <p className="text-center text-neutral-500 py-8">Loading chats…</p>
-          ) : filteredChats.length > 0 ? (
+          {chats.length > 0 ? (
             <div className="space-y-2">
-              {filteredChats.map((chat) => (
+              {chats.map((chat: BaseChat) => (
                 <ChatItem
                   key={chat._id}
-                  chat={chat}
+                  chat={{ ...chat }}
                   isSelected={selectedChatId === chat._id}
                   onClick={() => onSelectChat(chat._id)}
                 />
