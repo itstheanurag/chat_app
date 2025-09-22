@@ -5,8 +5,6 @@ import { ChatWindow } from "../chat/ChatWindow";
 import { useAuth } from "@/context/authContext";
 import { connectSocket } from "@/lib/socket/socket";
 import { getToken } from "@/lib/token";
-import { getUserChats } from "@/lib/apis/chat";
-import type { BaseChat } from "@/types/chat";
 
 export const ChatLayout: React.FC = () => {
   const { user } = useAuth();
@@ -48,7 +46,6 @@ export const ChatLayout: React.FC = () => {
       {selectedChatId ? (
         <ChatWindow
           chatId={selectedChatId}
-          messages={[]}
           currentUser={user}
           onSendMessage={handleSendMessage}
           onShowGroupInfo={() => console.log("Show group info")}

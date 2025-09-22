@@ -29,6 +29,16 @@ export interface RegisterResponse {
 
 export interface User {
   id: string;
-  name: string;
   email: string;
+  name: string;
+  isEmailVerified: boolean;
+  avatar?: string;
+  isOnline?: boolean;
+  lastSeen?: Date;
+}
+
+export interface AuthState {
+  user: User | null;
+  isAuthenticated: boolean;
+  isLoading: boolean;
 }

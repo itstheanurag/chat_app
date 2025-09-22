@@ -71,11 +71,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       const user = {
         id,
         email: userEmail,
-        username: name,
+        name: name,
         isOnline: true,
         lastSeen: new Date(),
         isEmailVerified,
       };
+
       saveUser(user);
 
       setAuthState({

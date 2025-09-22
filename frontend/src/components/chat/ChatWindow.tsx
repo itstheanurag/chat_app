@@ -10,9 +10,11 @@ import {
 } from "lucide-react";
 import type { Message, User } from "@/types";
 import { MessageBubble } from "./MessageBubble";
+import { findChatById } from "@/lib/apis/chat";
+import { type BaseChat } from "@/types";
+
 interface ChatWindowProps {
   chatId: string;
-  messages: Message[];
   currentUser: User | null;
   onSendMessage: (content: string) => void;
   onShowGroupInfo: () => void;
@@ -20,7 +22,6 @@ interface ChatWindowProps {
 
 export const ChatWindow: React.FC<ChatWindowProps> = ({
   chatId,
-  messages,
   currentUser,
   onSendMessage,
   onShowGroupInfo,
@@ -29,6 +30,8 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
   const [isTyping, setIsTyping] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [isLoading, setLoading] = useState<boolean>(true);
+  const [chat, setChat] = useState<BaseChat | null>(null);
+  const [messages, setMessages] = useState<Message[]>([]);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -50,25 +53,23 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
     const fetchChats = async () => {
       try {
         setLoading(true);
-        const res = await getUserChats();
-        if (res.success && Array.isArray(res.data)) {
-          setChats(res.data);
+        const res = await findChatById(chatId);
 
-          if (res.data.length > 0) {
-            onSelectChat(res.data[0]._id);
-          }
-        } else {
-          setChats([]);
+        // ✅ Check if backend returned the expected structure
+        if (res.success && res.data) {
+          const { chat, messages } = res.data;
+          setChat(chat);
+          setMessages(messages || []);
         }
       } catch (err) {
         console.error("Failed to fetch chats:", err);
-        setChats([]);
       } finally {
         setLoading(false);
       }
     };
+
     fetchChats();
-  }, []);
+  }, [chatId]);
 
   return (
     <div className="flex-1 flex flex-col h-full bg-white">
@@ -78,23 +79,23 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
           <div className="flex items-center gap-4">
             <div
               className={`w-12 h-12 border-3 border-slate-900 flex items-center justify-center font-bold text-white ${
-                chat.type === "group" ? "bg-navy-500" : "bg-coral-500"
+                chat?.type === "group" ? "bg-navy-500" : "bg-coral-500"
               }`}
             >
-              {chat.type === "group" ? (
+              {chat?.type === "group" ? (
                 <Users className="h-6 w-6" />
               ) : (
-                (chat.name || "Group Chat")?.charAt(0).toUpperCase()
+                (chat?.name || "Group Chat")?.charAt(0).toUpperCase()
               )}
             </div>
 
             <div>
               <h2 className="text-xl font-bold text-slate-900">
-                {(chat.name || "Group Chat")?.charAt(0).toUpperCase()}
+                {(chat?.name || "Group Chat")?.charAt(0).toUpperCase()}
               </h2>
               <p className="text-sm text-slate-600">
-                {chat.type === "group"
-                  ? `${chat.participants.length} members`
+                {chat?.type === "group"
+                  ? `${chat?.participants?.length} members`
                   : "Online"}
               </p>
             </div>
@@ -107,7 +108,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
             <button className="p-3 text-slate-600 hover:text-slate-900 hover:bg-white border-2 border-transparent hover:border-slate-300 transition-all">
               <Video className="h-5 w-5" />
             </button>
-            {chat.type === "group" && (
+            {chat?.type === "group" && (
               <button
                 onClick={onShowGroupInfo}
                 className="p-3 text-slate-600 hover:text-slate-900 hover:bg-white border-2 border-transparent hover:border-slate-300 transition-all"
@@ -126,10 +127,10 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
       <div className="flex-1 overflow-y-auto p-6 space-y-4">
         {messages.map((message) => (
           <MessageBubble
-            key={message.id}
+            key={message?._id}
             message={message}
             isOwn={message.senderId === currentUser?.id}
-            showSeen={chat.participants.length > 1}
+            showSeen={!!chat?.participants?.length}
           />
         ))}
         {isTyping && (

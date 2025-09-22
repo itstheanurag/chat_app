@@ -1,3 +1,5 @@
+import type { Message } from "./message.type";
+
 export interface GetUserChatsResult {
   success: boolean;
   message: string;
@@ -65,3 +67,9 @@ export interface ChatPopulated
 }
 
 export type ChatList = ChatPopulated[];
+
+export interface FindChatByIdResult {
+  success: boolean;
+  message: string;
+  data?: { chat: BaseChat; messages: Message[] };
+}

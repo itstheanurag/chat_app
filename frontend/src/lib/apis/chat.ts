@@ -2,6 +2,7 @@
 import type {
   BaseChat,
   CreateDirectChatResult,
+  FindChatByIdResult,
   GetUserChatsResult,
 } from "@/types/chat";
 import { formatApiError, extractErrorMessage } from "@/utils/formatter";
@@ -126,43 +127,33 @@ export async function createGroupChat(
 }
 
 /**
- * Create a direct chat between the current user and another user.
- * @param participantId - The userId of the participant to include in the direct chat.
- * @returns A result object containing the newly created chat or an error message.
+ * Fetch a chat by its ID.
+ * @param id - The ID of the chat to fetch.
+ * @returns A result object containing the chat or an error message.
  */
 export async function findChatById(
-  id: string
-): Promise<CreateDirectChatResult> {
+  chatId: string
+): Promise<FindChatByIdResult> {
   try {
-    const response = await api.post("/chats", {
-      type: "group",
-      participants: participantIds.map((id) => ({ userId: id })),
-      name,
-    });
+    const response = await api.get(`/chats/${chatId}`);
 
     if (!response.data?.success) {
       const formattedError = formatApiError(
         response.data?.error,
-        "Failed to create group chat."
+        "Failed to fetch chat details."
       );
       toast.error(formattedError);
       return { success: false, message: formattedError };
     }
 
-    const { message, data } = response.data as {
-      success: boolean;
-      message: string;
-      data: BaseChat;
-    };
-
-    toast.success(message);
-
+    const { message, data } = response.data as FindChatByIdResult;
     return { success: true, message, data };
   } catch (err: any) {
     const formattedError = extractErrorMessage(
       err,
-      "Unexpected error while creating group chat."
+      "Unexpected error while fetching chat details."
     );
+    toast.error(formattedError);
     return { success: false, message: formattedError };
   }
 }

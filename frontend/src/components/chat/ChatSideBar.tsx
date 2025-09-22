@@ -28,7 +28,7 @@ export const ChatSidebar: React.FC<ChatSidebarProps> = ({
         const res = await getUserChats();
         if (res.success && Array.isArray(res.data)) {
           setChats(res.data);
-          
+
           if (res.data.length > 0) {
             onSelectChat(res.data[0]._id);
           }
@@ -83,12 +83,10 @@ export const ChatSidebar: React.FC<ChatSidebarProps> = ({
           onClick={() => setMenuOpen((prev) => !prev)}
         >
           <div className="w-10 h-10 bg-green-500 border-2 border-neutral-900 flex items-center justify-center text-white font-bold shadow-button">
-            {(user?.username || "?").charAt(0).toUpperCase()}
+            {(user?.name || "?").charAt(0).toUpperCase()}
           </div>
           <div className="flex-1">
-            <p className="font-bold text-neutral-900">
-              {user?.username || "User"}
-            </p>
+            <p className="font-bold text-neutral-900">{user?.name || "User"}</p>
             <p className="text-sm text-neutral-600">{user?.email || ""}</p>
           </div>
           <div className="w-3 h-3 bg-green-500 border-2 border-white rounded-full" />
