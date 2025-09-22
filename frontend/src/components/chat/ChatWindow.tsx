@@ -2,17 +2,10 @@ import React, { useState, useRef, useEffect } from "react";
 import type { Message, User } from "@/types";
 import { MessageBubble } from "./MessageBubble";
 import { findChatById } from "@/lib/apis/chat";
-import {
-  Send,
-  Paperclip,
-  Smile,
-  MoreVertical,
-  Users,
-  Phone,
-  Video,
-} from "lucide-react";
+import { Send, MoreVertical, Users, Phone, Video } from "lucide-react";
 import { useAuth } from "@/context/authContext";
 import { getSocket, socket } from "@/lib/socket/socket";
+import ChatHeader from "./ChatHeader";
 
 interface ChatWindowProps {
   chatId: string;
@@ -29,9 +22,10 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
   const [chat, setChat] = useState<any>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  const scrollToBottom = () => {
+  // Scroll whenever messages change
+  useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  };
+  }, [messages]);
 
   useEffect(() => {
     const fetchChats = async () => {
@@ -58,7 +52,6 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
     const handleNewMessage = (msg: Message) => {
       if (msg.chatId === chatId) {
         setMessages((prev) => [...prev, msg]);
-        scrollToBottom();
       }
     };
 
@@ -74,8 +67,6 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
     e.preventDefault();
     const content = messageInput.trim();
     if (!content || !user) return;
-
-    scrollToBottom();
     socket?.emit("sendMessage", {
       chatId,
       text: messageInput,
@@ -87,54 +78,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
 
   return (
     <div className="flex-1 flex flex-col h-full bg-white">
-      <div className="bg-sage-100 border-b-4 border-slate-900 p-6">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <div
-              className={`w-12 h-12 border-3 border-slate-900 flex items-center justify-center font-bold text-white ${
-                chat?.type === "group" ? "bg-navy-500" : "bg-coral-500"
-              }`}
-            >
-              {chat?.type === "group" ? (
-                <Users className="h-6 w-6" />
-              ) : (
-                (chat?.name || "Group Chat")?.charAt(0).toUpperCase()
-              )}
-            </div>
-
-            <div>
-              <h2 className="text-xl font-bold text-slate-900">
-                {(chat?.name || "Group Chat")?.charAt(0).toUpperCase()}
-              </h2>
-              <p className="text-sm text-slate-600">
-                {chat?.type === "group"
-                  ? `${chat?.participants?.length} members`
-                  : "Online"}
-              </p>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-3">
-            <button className="p-3 text-slate-600 hover:text-slate-900 hover:bg-white border-2 border-transparent hover:border-slate-300 transition-all">
-              <Phone className="h-5 w-5" />
-            </button>
-            <button className="p-3 text-slate-600 hover:text-slate-900 hover:bg-white border-2 border-transparent hover:border-slate-300 transition-all">
-              <Video className="h-5 w-5" />
-            </button>
-            {chat?.type === "group" && (
-              <button
-                onClick={onShowGroupInfo}
-                className="p-3 text-slate-600 hover:text-slate-900 hover:bg-white border-2 border-transparent hover:border-slate-300 transition-all"
-              >
-                <Users className="h-5 w-5" />
-              </button>
-            )}
-            <button className="p-3 text-slate-600 hover:text-slate-900 hover:bg-white border-2 border-transparent hover:border-slate-300 transition-all">
-              <MoreVertical className="h-5 w-5" />
-            </button>
-          </div>
-        </div>
-      </div>
+      <ChatHeader chat={chat} onShowGroupInfo={onShowGroupInfo} />
       {/* Messages */}
 
       <div className="flex-1 overflow-y-auto p-6 space-y-4">
@@ -142,10 +86,11 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
           <MessageBubble
             key={m._id}
             message={m}
-            isOwn={m.senderId === user?.id}
+            isOwn={m.senderId._id === user?.id}
             showSeen={!!chat?.participants?.length}
           />
         ))}
+        {/* Invisible div at the bottom to scroll into */}
         <div ref={messagesEndRef} />
       </div>
 

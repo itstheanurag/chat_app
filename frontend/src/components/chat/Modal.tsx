@@ -1,10 +1,12 @@
-import { getUserChats } from "@/lib/apis/chat";
 import { MessageCircle, Users } from "lucide-react";
 import React, { useState } from "react";
 import Button from "../ui/Button";
 import { ChatModal } from "./createChatModal";
 
-const Modal: React.FC = () => {
+interface ChatModalProps {
+  onChatCreated: () => void; // ✅ Added callback
+}
+const Modal: React.FC<ChatModalProps> = ({ onChatCreated }) => {
   const [modalOpen, setModalOpen] = useState(false);
   const [modalType, setModalType] = useState<"direct" | "group">("direct");
 
@@ -37,7 +39,7 @@ const Modal: React.FC = () => {
           isOpen={modalOpen}
           onClose={() => setModalOpen(false)}
           type={modalType}
-          onChatCreated={() => getUserChats()}
+          onChatCreated={onChatCreated}
         />
       </div>
     </div>

@@ -9,7 +9,7 @@ interface ChatModalProps {
   isOpen: boolean;
   onClose: () => void;
   type: "direct" | "group";
-  onChatCreated?: () => void; // ✅ Added callback
+  onChatCreated: () => void;
 }
 
 export const ChatModal: React.FC<ChatModalProps> = ({
@@ -78,8 +78,7 @@ export const ChatModal: React.FC<ChatModalProps> = ({
         const ids = selectedUsers.map((u) => u.id);
         await createGroupChat(ids, groupName);
       }
-      // ✅ Notify parent and close
-      onChatCreated?.();
+      onChatCreated();
       resetState();
       onClose();
     } catch (err) {

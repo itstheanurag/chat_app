@@ -21,29 +21,30 @@ export const ChatSidebar: React.FC<ChatSidebarProps> = ({
   const [chats, setChats] = useState<BaseChat[]>([]);
   const [menuOpen, setMenuOpen] = useState<boolean>(false);
 
-  useEffect(() => {
-    const fetchChats = async () => {
-      try {
-        setLoading(true);
-        const res = await getUserChats();
-        if (res.success && Array.isArray(res.data)) {
-          setChats(res.data);
-          if (res.data.length > 0) {
-            onSelectChat(res.data[0]._id);
-          }
+  const fetchChats = async () => {
+    try {
+      setLoading(true);
+      const res = await getUserChats();
+      if (res.success && Array.isArray(res.data)) {
+        setChats(res.data);
+        if (res.data.length > 0) {
+          onSelectChat(res.data[0]._id);
         }
-      } catch (err) {
-        console.error("Failed to fetch chats:", err);
-      } finally {
-        setLoading(false);
       }
-    };
+    } catch (err) {
+      console.error("Failed to fetch chats:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
     fetchChats();
   }, [user]);
 
   return (
     <div className="w-100 bg-white border-r-4 border-neutral-900 flex flex-col h-full overflow-x-hidden">
-      <Modal />
+      <Modal onChatCreated={fetchChats} />
       {/* Chat list */}
       <div className="flex-1 overflow-y-auto">
         <div className="p-4">

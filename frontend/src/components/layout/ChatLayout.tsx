@@ -7,7 +7,6 @@ import { connectSocket } from "@/lib/socket/socket";
 import { getToken } from "@/lib/storage";
 
 export const ChatLayout: React.FC = () => {
-  const { user } = useAuth();
   const [selectedChatId, setSelectedChatId] = useState<string>("1");
   const [isConnected, setIsConnected] = useState(false);
 
@@ -27,7 +26,7 @@ export const ChatLayout: React.FC = () => {
       socket.disconnect();
       setIsConnected(false);
     };
-  }, [token]);
+  }, []);
 
   return (
     <div className="h-screen bg-sage-50 flex">
