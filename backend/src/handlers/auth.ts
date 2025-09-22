@@ -178,13 +178,18 @@ export const regreshTokenApiCall = async (
     const user = req.user!;
     console.log(user);
 
-    const tokens = generateAccessToken({
+    const accessToken = await generateAccessToken({
       id: user.id,
       email: user.email,
       name: user.name,
     });
 
-    return sendResponse(res, 200, tokens, "Tokens refreshed successfully");
+    return sendResponse(
+      res,
+      200,
+      { accessToken },
+      "Tokens refreshed successfully"
+    );
   } catch (err) {
     console.error("Refresh token error:", err);
     return sendError(res, 500, "Failed to refresh token");

@@ -17,42 +17,29 @@ let failedQueue: {
   config: any;
 }[] = [];
 
-// const processQueue = (error: unknown, token: string | null = null) => {
-//   failedQueue.forEach((req) => {
-//     if (error) {
-//       req.reject(error);
-//     } else {
-//       if (token) {
-//         // Override the old Authorization header with the new token
-//         req.config.headers = {
-//           ...req.config.headers,
-//           Authorization: `Bearer ${token}`,
-//         };
-//       }
-//       req.resolve(api(req.config));
-//     }
-//   });
-//   failedQueue = [];
-// };
+api.interceptors.request.use((config) => {
+  const token = getToken("accessToken");
+  if (token)
+    config.headers = {
+      ...config.headers,
+      Authorization: `Bearer ${token}`,
+    } as any;
+  return config;
+});
 
 api.interceptors.response.use(
   (response) => response,
   async (error: AxiosError) => {
     const originalRequest: any = error.config;
 
-    // Prevent retry loop for refresh endpoint itself
     if (originalRequest.url?.includes("/auth/refresh")) {
       return Promise.reject(error);
     }
 
-    if (
-      (error.response?.status === 401 || error.response?.status === 403) &&
-      !originalRequest._retry
-    ) {
+    if (error.response?.status === 401 && !originalRequest._retry) {
       originalRequest._retry = true;
 
       if (isRefreshing) {
-        // Queue this request until the token is refreshed
         return new Promise((resolve, reject) => {
           failedQueue.push({ resolve, reject, config: originalRequest });
         });

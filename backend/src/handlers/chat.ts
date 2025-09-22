@@ -82,7 +82,6 @@ export const listUserChats = async (
       $or: [{ "participants.userId": userId }, { admins: userId }],
     })
       .sort({ updatedAt: -1 })
-      // Populate participants and admins with selected fields
       .populate("participants.userId", "name email")
       .populate("admins", "name email");
 

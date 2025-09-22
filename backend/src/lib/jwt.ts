@@ -55,6 +55,8 @@ export async function generateAccessToken(
 ): Promise<string> {
   const accessSecret: jwt.Secret = process.env.JWT_ACCESS_SECRET ?? "";
 
+  await redisClient.del(`${REDIS_KEYS.accessTokenKey}:${payload.id}`);
+
   const accessExpiresIn =
     process.env.JWT_ACCESS_EXPIRES_IN ?? ("15m" as unknown as any);
   const accessToken = jwt.sign({ ...payload }, accessSecret, {
@@ -64,9 +66,13 @@ export async function generateAccessToken(
 
   const accessTtlSeconds = 15 * 60;
 
-  await redisClient.set(`login_access_token:${payload.id}`, accessToken, {
-    EX: accessTtlSeconds,
-  });
+  await redisClient.set(
+    `${REDIS_KEYS.accessTokenKey}:${payload.id}`,
+    accessToken,
+    {
+      EX: accessTtlSeconds,
+    }
+  );
 
   return accessToken;
 }

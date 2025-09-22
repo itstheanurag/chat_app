@@ -15,8 +15,8 @@ export const chatRouter: Router = Router();
 
 chatRouter.use(auth);
 
-chatRouter.post("/", createChat);
-chatRouter.get("/", listUserChats);
+chatRouter.post("", createChat);
+chatRouter.get("", listUserChats);
 
 chatRouter.get("/:chatId", chatGuard(), findChatById);
 
