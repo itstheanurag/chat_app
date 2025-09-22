@@ -12,8 +12,6 @@ export const ChatLayout: React.FC = () => {
   const { user } = useAuth();
   const [selectedChatId, setSelectedChatId] = useState<string>("1");
   const [isConnected, setIsConnected] = useState(false);
-  const [chats, setChats] = useState<BaseChat[]>([]);
-  const [loading, setLoading] = useState(true);
 
   const token = getToken("accessToken");
 
@@ -36,47 +34,20 @@ export const ChatLayout: React.FC = () => {
     };
   }, [token]);
 
-  useEffect(() => {
-    const fetchChats = async () => {
-      try {
-        setLoading(true);
-        const res = await getUserChats();
-        if (res.success && Array.isArray(res.data)) {
-          setChats(res.data);
-          if (res.data.length > 0) {
-            setSelectedChatId(res.data[0]._id);
-          }
-        } else {
-          setChats([]);
-        }
-      } catch (err) {
-        console.error("Failed to fetch chats:", err);
-        setChats([]);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchChats();
-  }, []);
-
   const handleSendMessage = (content: string) => {
     console.log("Sending message:", content);
   };
 
-  const selectedChat = chats.find((chat) => chat._id === selectedChatId);
-
   return (
     <div className="h-screen bg-sage-50 flex">
       <ChatSidebar
-        chats={chats}
         selectedChatId={selectedChatId}
         onSelectChat={setSelectedChatId}
-        rerenderRequired={isRenderRequired}
       />
 
-      {selectedChat ? (
+      {selectedChatId ? (
         <ChatWindow
-          chat={selectedChat}
+          chatId={selectedChatId}
           messages={[]}
           currentUser={user}
           onSendMessage={handleSendMessage}

@@ -10,10 +10,8 @@ import {
 } from "lucide-react";
 import type { Message, User } from "@/types";
 import { MessageBubble } from "./MessageBubble";
-import type { BaseChat } from "@/types/chat";
-
 interface ChatWindowProps {
-  chat: BaseChat;
+  chatId: string;
   messages: Message[];
   currentUser: User | null;
   onSendMessage: (content: string) => void;
@@ -21,7 +19,7 @@ interface ChatWindowProps {
 }
 
 export const ChatWindow: React.FC<ChatWindowProps> = ({
-  chat,
+  chatId,
   messages,
   currentUser,
   onSendMessage,
@@ -30,6 +28,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
   const [messageInput, setMessageInput] = useState("");
   const [isTyping, setIsTyping] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const [isLoading, setLoading] = useState<boolean>(true);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -46,6 +45,30 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
       setMessageInput("");
     }
   };
+
+  useEffect(() => {
+    const fetchChats = async () => {
+      try {
+        setLoading(true);
+        const res = await getUserChats();
+        if (res.success && Array.isArray(res.data)) {
+          setChats(res.data);
+
+          if (res.data.length > 0) {
+            onSelectChat(res.data[0]._id);
+          }
+        } else {
+          setChats([]);
+        }
+      } catch (err) {
+        console.error("Failed to fetch chats:", err);
+        setChats([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchChats();
+  }, []);
 
   return (
     <div className="flex-1 flex flex-col h-full bg-white">

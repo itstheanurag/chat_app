@@ -1,64 +1,53 @@
-import React, { useState } from "react";
-import { Search, Users, MessageCircle } from "lucide-react";
+import React, { useEffect, useState } from "react";
+import { MessageCircle } from "lucide-react";
 import { ChatItem } from "./ChatItem";
-import Button from "../ui/Button";
 import { useAuth } from "@/context/authContext";
 import type { BaseChat } from "@/types/chat";
-import { ChatModal } from "./createChatModal";
+import { getUserChats } from "@/lib/apis/chat";
+import Modal from "./Modal";
 
 interface ChatSidebarProps {
-  chats: BaseChat[];
   selectedChatId?: string;
   onSelectChat: (chatId: string) => void;
 }
 
 export const ChatSidebar: React.FC<ChatSidebarProps> = ({
-  chats,
   selectedChatId,
   onSelectChat,
 }) => {
   const { logout, user } = useAuth();
-  const [menuOpen, setMenuOpen] = useState(false);
 
-  const [modalOpen, setModalOpen] = useState(false);
-  const [modalType, setModalType] = useState<"direct" | "group">("direct");
+  const [isLoading, setLoading] = useState<boolean>(true);
+  const [chats, setChats] = useState<BaseChat[]>([]);
+  const [menuOpen, setMenuOpen] = useState<boolean>(false);
+
+  useEffect(() => {
+    const fetchChats = async () => {
+      try {
+        setLoading(true);
+        const res = await getUserChats();
+        if (res.success && Array.isArray(res.data)) {
+          setChats(res.data);
+          
+          if (res.data.length > 0) {
+            onSelectChat(res.data[0]._id);
+          }
+        } else {
+          setChats([]);
+        }
+      } catch (err) {
+        console.error("Failed to fetch chats:", err);
+        setChats([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchChats();
+  }, []);
 
   return (
     <div className="w-100 bg-white border-r-4 border-neutral-900 flex flex-col h-full overflow-x-hidden">
-      {/* Search and actions */}
-      <div className="bg-neutral-100 border-b-4 border-neutral-900 p-6">
-        <div className="flex items-center justify-center gap-3">
-          <Button
-            onClick={() => {
-              setModalType("direct");
-              setModalOpen(true);
-            }}
-            className="flex-1 flex items-center justify-center gap-2"
-          >
-            <MessageCircle className="h-4 w-4" />
-            New Chat
-          </Button>
-
-          <Button
-            onClick={() => {
-              setModalType("group");
-              setModalOpen(true);
-            }}
-            className="flex-1 flex items-center justify-center gap-2"
-          >
-            <Users className="h-4 w-4" />
-            New Group
-          </Button>
-
-          <ChatModal
-            isOpen={modalOpen}
-            onClose={() => setModalOpen(false)}
-            type={modalType}
-            onChatCreated={() => fetchChats()}
-          />
-        </div>
-      </div>
-
+      <Modal />
       {/* Chat list */}
       <div className="flex-1 overflow-y-auto">
         <div className="p-4">

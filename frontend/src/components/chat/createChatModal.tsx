@@ -9,18 +9,19 @@ interface ChatModalProps {
   isOpen: boolean;
   onClose: () => void;
   type: "direct" | "group";
+  onChatCreated?: () => void; // ✅ Added callback
 }
 
 export const ChatModal: React.FC<ChatModalProps> = ({
   isOpen,
   onClose,
   type,
+  onChatCreated,
 }) => {
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<User[]>([]);
   const [selectedUsers, setSelectedUsers] = useState<User[]>([]);
   const [groupName, setGroupName] = useState("");
-  const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
   const [creating, setCreating] = useState(false);
 
@@ -45,7 +46,6 @@ export const ChatModal: React.FC<ChatModalProps> = ({
     return () => clearTimeout(timer);
   }, [query]);
 
-  // ✅ Toggle selected participants
   const toggleUser = (user: User) => {
     setSelectedUsers((prev) =>
       prev.find((u) => u.id === user.id)
@@ -59,7 +59,6 @@ export const ChatModal: React.FC<ChatModalProps> = ({
     setResults([]);
     setSelectedUsers([]);
     setGroupName("");
-    setMessage("");
     setCreating(false);
     setLoading(false);
   };
@@ -79,6 +78,8 @@ export const ChatModal: React.FC<ChatModalProps> = ({
         const ids = selectedUsers.map((u) => u.id);
         await createGroupChat(ids, groupName);
       }
+      // ✅ Notify parent and close
+      onChatCreated?.();
       resetState();
       onClose();
     } catch (err) {
@@ -97,7 +98,6 @@ export const ChatModal: React.FC<ChatModalProps> = ({
           {type === "group" ? "New Group" : "New Chat"}
         </h2>
 
-        {/* Group Name */}
         {type === "group" && (
           <input
             type="text"
@@ -152,6 +152,7 @@ export const ChatModal: React.FC<ChatModalProps> = ({
             query && <p>No users found</p>
           )}
         </div>
+
         {/* Actions */}
         <div className="flex justify-end gap-2">
           <Button
