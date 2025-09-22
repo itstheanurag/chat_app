@@ -1,5 +1,5 @@
 import type { Response } from "express";
-import { Chat } from "models";
+import { Chat, Message } from "models";
 import { ChatInput, chatSchema, modifyParticipantsSchema } from "schemas";
 import { AuthenticatedRequest } from "middleware/auth";
 import { sendResponse, sendError } from "lib/response";
@@ -310,4 +310,40 @@ const handleDirectChatCreation = async (
 
   await newChat.save();
   return sendResponse(response, 201, newChat, "Chat created successfully");
+};
+
+/**
+ * Fetch a specific chat by ID and return its last 20 messages.
+ */
+export const findChatById = async (
+  req: AuthenticatedRequest,
+  res: Response
+): Promise<Response> => {
+  try {
+    const userId = req.user?.id;
+    const chat = req.chat;
+
+    if (!userId || !chat) {
+      return sendError(res, 403, "Forbidden resource");
+    }
+
+    const chatId = req.params.chatId;
+
+    const messages = await Message.find({ chatId })
+      .sort({ createdAt: -1 })
+      .limit(20)
+      .populate("sender", "name email");
+
+    const sortedMessages = [...messages].reverse();
+
+    return sendResponse(
+      res,
+      200,
+      { chat, messages: sortedMessages },
+      "Chat retrieved successfully"
+    );
+  } catch (err: any) {
+    console.error(err);
+    return sendError(res, 500, err.message || "Failed to fetch chat");
+  }
 };

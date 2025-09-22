@@ -4,6 +4,7 @@ import {
   archiveChat,
   createChat,
   deleteChat,
+  findChatById,
   listUserChats,
   listUsersArchivedChats,
   removeUsersFromGroupChat,
@@ -19,12 +20,15 @@ chatRouter.post("/", createChat);
 chatRouter.get("/", listUserChats);
 chatRouter.get("/archived", listUsersArchivedChats);
 
-chatRouter.use(chatGuard);
-
-chatRouter.patch("/:chatId/archive", archiveChat);
-chatRouter.patch("/:chatId/unarchive", archiveChat);
-chatRouter.patch("/:chatId/add/participant", addUsersToGroupChat);
-chatRouter.patch("/:chatId/remove/participant", removeUsersFromGroupChat);
-chatRouter.delete("/:chatId", deleteChat);
+chatRouter.get("/:chatId", chatGuard, findChatById);
+chatRouter.patch("/:chatId/archive", chatGuard, archiveChat);
+chatRouter.patch("/:chatId/unarchive", chatGuard, archiveChat);
+chatRouter.patch("/:chatId/add/participant", chatGuard, addUsersToGroupChat);
+chatRouter.patch(
+  "/:chatId/remove/participant",
+  chatGuard,
+  removeUsersFromGroupChat
+);
+chatRouter.delete("/:chatId", chatGuard, deleteChat);
 
 // export default chatRouter;
