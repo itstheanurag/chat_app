@@ -332,7 +332,7 @@ export const findChatById = async (
     const messages = await Message.find({ chatId })
       .sort({ createdAt: -1 })
       .limit(20)
-      .populate("sender", "name email");
+      .populate("senderId", "_id name email");
 
     const sortedMessages = [...messages].reverse();
 

@@ -1,6 +1,7 @@
 import { Server, Socket } from "socket.io";
 import jwt from "jsonwebtoken";
 import type { Server as HTTPServer } from "http";
+import { registerChatEvents } from ".";
 
 interface JwtPayloadOptions {
   id: string;
@@ -41,8 +42,6 @@ export function initializeSocket({
         `Transport: ${socket.conn.transport}`
     );
 
-    // If you’re attaching user info after auth middleware:
-
     const token = socket.handshake.query.token as string;
     if (!token) return next(new Error("Authentication error"));
 
@@ -57,13 +56,7 @@ export function initializeSocket({
     }
   });
 
-  io.on("connection", (socket: AuthenticatedSocket) => {
-    console.log(`User connected: ${socket.user?.name || "Unknown"}`);
-    if (socket.data?.user) {
-      const { id, email } = socket.data.user;
-      console.log(`👤 Authenticated user -> ID: ${id}, Email: ${email}`);
-    }
-  });
+  registerChatEvents(io);
 
   return io;
 }

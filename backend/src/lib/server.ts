@@ -2,7 +2,7 @@ import express, { type Express } from "express";
 import helmet from "helmet";
 import dotenv from "dotenv";
 import connectToDatabase from "../config";
-import { initializeSocket } from "./socket";
+import { initializeSocket } from "./socket/socket";
 import mongoose from "mongoose";
 import { authRouter, chatRouter, messageRouter, userRouter } from "routes";
 import { redisClient } from "./redis";
@@ -12,6 +12,7 @@ import {
   allowedOrigins,
   corsMiddleware,
 } from "./cors";
+import { apiLogger } from "middleware/looger";
 
 dotenv.config();
 
@@ -32,6 +33,7 @@ app.use(express.json());
 app.use(express.urlencoded({ limit: "2mb", extended: true }));
 app.use(helmet());
 app.use(corsMiddleware);
+app.use(apiLogger);
 
 // Routes
 app.use("/api/v1/auth", authRouter);

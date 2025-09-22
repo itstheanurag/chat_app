@@ -1,13 +1,12 @@
 import { Router } from "express";
 import {
-  addUsersToGroupChat,
-  archiveChat,
-  createChat,
-  deleteChat,
   findChatById,
-  listUserChats,
-  listUsersArchivedChats,
+  archiveChat,
+  addUsersToGroupChat,
   removeUsersFromGroupChat,
+  deleteChat,
+  listUserChats,
+  createChat,
 } from "handlers/chat";
 import { auth } from "middleware/auth";
 import { chatGuard } from "middleware/chat-guard";
@@ -18,17 +17,29 @@ chatRouter.use(auth);
 
 chatRouter.post("/", createChat);
 chatRouter.get("/", listUserChats);
-chatRouter.get("/archived", listUsersArchivedChats);
 
-chatRouter.get("/:chatId", chatGuard, findChatById);
-chatRouter.patch("/:chatId/archive", chatGuard, archiveChat);
-chatRouter.patch("/:chatId/unarchive", chatGuard, archiveChat);
-chatRouter.patch("/:chatId/add/participant", chatGuard, addUsersToGroupChat);
+chatRouter.get("/:chatId", chatGuard(), findChatById);
+
+chatRouter.patch(
+  "/:chatId/archive",
+  chatGuard({ requireAdmin: true }),
+  archiveChat
+);
+chatRouter.patch(
+  "/:chatId/unarchive",
+  chatGuard({ requireAdmin: true }),
+  archiveChat
+);
+
+chatRouter.patch(
+  "/:chatId/add/participant",
+  chatGuard({ requireAdmin: true }),
+  addUsersToGroupChat
+);
 chatRouter.patch(
   "/:chatId/remove/participant",
-  chatGuard,
+  chatGuard({ requireAdmin: true }),
   removeUsersFromGroupChat
 );
-chatRouter.delete("/:chatId", chatGuard, deleteChat);
 
-// export default chatRouter;
+chatRouter.delete("/:chatId", chatGuard({ requireAdmin: true }), deleteChat);

@@ -79,7 +79,7 @@ export async function refreshTokenGuard(
     return sendError(res, 500, "Server configuration error");
   }
 
-  const refreshToken = req.body.refreshToken;
+  const refreshToken = req.body.token;
   if (!refreshToken) {
     return sendError(res, 401, "Refresh token missing");
   }

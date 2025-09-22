@@ -170,16 +170,13 @@ export const searchUser = async (
   }
 };
 
-export const refreshToken = async (
+export const regreshTokenApiCall = async (
   req: AuthenticatedRequest,
   res: Response
 ): Promise<Response> => {
   try {
-    const user = req.user;
-
-    if (!user) {
-      return sendError(res, 400, "User not found");
-    }
+    const user = req.user!;
+    console.log(user);
 
     const tokens = generateAccessToken({
       id: user.id,

@@ -4,7 +4,7 @@ import { messageSchema } from "schemas";
 import { sendResponse, sendError } from "../lib/response";
 import { AuthenticatedRequest } from "middleware/auth";
 
-import { AuthenticatedSocket } from "lib/socket";
+import { AuthenticatedSocket } from "lib/socket/socket";
 
 export function handleChatMessage(socket: AuthenticatedSocket, message: any) {
   console.log(`📨 Message from ${socket.user?.name || "Unknown"}:`, message);
