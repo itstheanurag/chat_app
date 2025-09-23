@@ -2,7 +2,6 @@ import React, { useEffect, useState } from "react";
 import { MessageSquare } from "lucide-react";
 import { ChatSidebar } from "../chat/ChatSideBar";
 import { ChatWindow } from "../chat/ChatWindow";
-import { useAuth } from "@/context/authContext";
 import { connectSocket } from "@/lib/socket/socket";
 import { getToken } from "@/lib/storage";
 

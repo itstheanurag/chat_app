@@ -69,7 +69,7 @@ export const ChatModal: React.FC<ChatModalProps> = ({
     try {
       if (type === "direct") {
         const participant = selectedUsers[0];
-        await createDirectChat(participant.id, participant.name);
+        await createDirectChat(participant.id);
       } else {
         if (!groupName.trim()) {
           setCreating(false);

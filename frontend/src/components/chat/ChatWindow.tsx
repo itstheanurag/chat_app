@@ -22,7 +22,6 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
   const [chat, setChat] = useState<any>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  // Scroll whenever messages change
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
@@ -48,7 +47,6 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
     if (!socket || !chatId) return;
 
     socket.emit("joinChat", chatId);
-
     const handleNewMessage = (msg: Message) => {
       if (msg.chatId === chatId) {
         setMessages((prev) => [...prev, msg]);
@@ -56,7 +54,6 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
     };
 
     socket.on("receiveMessage", handleNewMessage);
-
     return () => {
       socket.emit("leaveChat", chatId);
       socket.off("receiveMessage", handleNewMessage);
@@ -82,11 +79,11 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
       {/* Messages */}
 
       <div className="flex-1 overflow-y-auto p-6 space-y-4">
-        {messages.map((m) => (
+        {messages.map((m: Message) => (
           <MessageBubble
             key={m._id}
             message={m}
-            isOwn={m.senderId._id === user?.id}
+            isOwn={m.senderId.toString() === user?.id}
             showSeen={!!chat?.participants?.length}
           />
         ))}

@@ -13,8 +13,9 @@ export const ChatItem: React.FC<ChatItemProps> = ({
   isSelected,
   onClick,
 }) => {
-  const formatTime = (date?: Date) => {
+  const formatTime = (date?: Date | string) => {
     if (!date) return "";
+    if (typeof date === "string") date = new Date(date);
     const now = new Date();
     const diff = now.getTime() - date.getTime();
     const hours = Math.floor(diff / (1000 * 60 * 60));

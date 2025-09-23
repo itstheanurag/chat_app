@@ -47,14 +47,12 @@ export async function getUserChats(): Promise<GetUserChatsResult> {
  * @returns A result object containing the newly created chat or an error message.
  */
 export async function createDirectChat(
-  participantId: string,
-  name: string
+  participantId: string
 ): Promise<CreateDirectChatResult> {
   try {
     const response = await api.post("/chats", {
       type: "direct",
       participants: [{ userId: participantId }],
-      name,
     });
 
     if (!response.data?.success) {
