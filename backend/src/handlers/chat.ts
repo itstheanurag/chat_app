@@ -81,7 +81,7 @@ export const listUserChats = async (
       isArchived: { $ne: true },
       $or: [{ "participants.userId": userId }, { admins: userId }],
     })
-      .sort({ updatedAt: -1 })
+      .sort({ "lastMessage.createdAt": -1, updatedAt: -1 })
       .populate("participants.userId", "name email")
       .populate("admins", "name email");
 
@@ -330,8 +330,7 @@ export const findChatById = async (
 
     const messages = await Message.find({ chatId })
       .sort({ createdAt: -1 })
-      .limit(20)
-      .populate("senderId", "_id name email");
+      .limit(20);
 
     const sortedMessages = [...messages].reverse();
 

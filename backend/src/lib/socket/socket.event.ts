@@ -22,13 +22,11 @@ export function registerChatEvents(io: Server) {
         if (!isParticipant) return socket.emit("error", "Access denied");
         socket.join(chatId);
         console.log(`${socket?.user?.name} joined chat ${chatId}`);
-        // Send last 20 messages
         const messages = await Message.find({ chatId })
           .sort({ createdAt: -1 })
           .limit(20)
           .populate("senderId", "name email");
 
-        // Reverse so newest at bottom
         socket.emit("chatHistory", messages.reverse());
       } catch (err) {
         console.error(err);
@@ -43,28 +41,33 @@ export function registerChatEvents(io: Server) {
       "sendMessage",
       async (data: { chatId: string; text: string; senderId: string }) => {
         try {
-          console.log(data);
           const { chatId, text, senderId } = data;
-
           if (!text.trim()) return;
 
           const chat = await Chat.findById(chatId);
           if (!chat) return socket.emit("error", "Chat not found");
 
-          // Only allow participants
+          // Validate participant
           const isParticipant = chat.participants.some(
             (p) => p.userId.toString() === socket.user!.id
           );
           if (!isParticipant) return socket.emit("error", "Access denied");
 
+          // Create and save the new message
           const newMessage = await Message.create({
             chatId,
-            senderId: senderId,
-            text: text,
+            senderId,
+            text,
             status: "sent",
           });
 
-          // Broadcast to everyone in the room
+          chat.lastMessage = {
+            text: data.text,
+            senderId: newMessage.senderId,
+            createdAt: new Date(),
+          };
+
+          await chat.save();
           io.to(chatId).emit("receiveMessage", newMessage);
         } catch (err) {
           console.error(err);
