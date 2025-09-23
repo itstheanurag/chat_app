@@ -44,6 +44,8 @@ export function registerChatEvents(io: Server) {
           const { chatId, text, senderId } = data;
           if (!text.trim()) return;
 
+          console.log(data);
+
           const chat = await Chat.findById(chatId);
           if (!chat) return socket.emit("error", "Chat not found");
 
@@ -69,6 +71,29 @@ export function registerChatEvents(io: Server) {
 
           await chat.save();
           io.to(chatId).emit("receiveMessage", newMessage);
+        } catch (err) {
+          console.error(err);
+          socket.emit("error", "Failed to send message");
+        }
+      }
+    );
+
+    socket.on("typing", async (data: { chatId: string; username: string }) => {
+      try {
+        const { chatId, username } = data;
+        io.to(chatId).emit("userTyping", { username });
+      } catch (err) {
+        console.error(err);
+        socket.emit("error", "Failed to send message");
+      }
+    });
+
+    socket.on(
+      "stopTyping",
+      async (data: { chatId: string; username: string }) => {
+        try {
+          const { chatId, username } = data;
+          io.to(chatId).emit("stopTyping", { username });
         } catch (err) {
           console.error(err);
           socket.emit("error", "Failed to send message");

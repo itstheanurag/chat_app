@@ -3,6 +3,7 @@ import type { BaseChat } from "@/types";
 import { extractChatName } from "@/utils/formatter";
 import { Users, Phone, Video, MoreVertical } from "lucide-react";
 import React from "react";
+import ChatAvatar from "./ChatAvatar";
 
 interface ChatHeaderProps {
   chat: BaseChat;
@@ -14,17 +15,7 @@ const ChatHeader: React.FC<ChatHeaderProps> = ({ chat, onShowGroupInfo }) => {
     <div className="bg-sage-100 border-b-4 border-slate-900 p-6">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
-          <div
-            className={`w-12 h-12 border-3 border-slate-900 flex items-center justify-center font-bold text-white ${
-              chat?.type === "group" ? "bg-navy-500" : "bg-coral-500"
-            }`}
-          >
-            {chat?.type === "group" ? (
-              <Users className="h-6 w-6" />
-            ) : (
-              extractChatName(chat, user)
-            )}
-          </div>
+          <ChatAvatar chat={chat} user={user} />
 
           <div>
             <h2 className="text-xl font-bold text-slate-900">
