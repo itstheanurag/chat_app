@@ -1,4 +1,6 @@
+import { useAuth } from "@/context/authContext";
 import type { BaseChat } from "@/types";
+import { extractChatName } from "@/utils/formatter";
 import { Users, Phone, Video, MoreVertical } from "lucide-react";
 import React from "react";
 
@@ -7,6 +9,7 @@ interface ChatHeaderProps {
   onShowGroupInfo: () => void;
 }
 const ChatHeader: React.FC<ChatHeaderProps> = ({ chat, onShowGroupInfo }) => {
+  const { user } = useAuth();
   return (
     <div className="bg-sage-100 border-b-4 border-slate-900 p-6">
       <div className="flex items-center justify-between">
@@ -19,13 +22,13 @@ const ChatHeader: React.FC<ChatHeaderProps> = ({ chat, onShowGroupInfo }) => {
             {chat?.type === "group" ? (
               <Users className="h-6 w-6" />
             ) : (
-              chat?.name || "Group Chat"
+              extractChatName(chat, user)
             )}
           </div>
 
           <div>
             <h2 className="text-xl font-bold text-slate-900">
-              {chat?.name || "Group Chat"}
+              {extractChatName(chat, user)}
             </h2>
             <p className="text-sm text-slate-600">
               {chat?.type === "group"

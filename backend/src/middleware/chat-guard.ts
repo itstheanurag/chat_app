@@ -28,15 +28,15 @@ export const chatGuard = (options: ChatGuardOptions = {}) => {
       }
 
       const userId = req.user?.id;
-      const chat = await Chat.findById(chatId);
+      const chat = await Chat.findById(chatId)
+        .populate("participants.userId", "_id name email")
+        .exec();
 
       if (!chat) return sendError(res, 404, "Chat not found");
-
-      // Check if user is participant for both direct & group chats
       const isParticipant = chat.participants.some(
-        (p) => p.userId.toString() === userId
+        (p) => p.userId?._id?.toString() === userId
       );
-      
+
       if (!isParticipant) {
         return sendError(res, 403, "You are not part of this chat");
       }

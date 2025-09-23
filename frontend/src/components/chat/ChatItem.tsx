@@ -1,6 +1,8 @@
 import React from "react";
 import { Users, Check, CheckCheck } from "lucide-react";
 import type { BaseChat } from "@/types/chat";
+import { useAuth } from "@/context/authContext";
+import { extractChatName } from "@/utils/formatter";
 
 interface ChatItemProps {
   chat: BaseChat;
@@ -13,6 +15,7 @@ export const ChatItem: React.FC<ChatItemProps> = ({
   isSelected,
   onClick,
 }) => {
+  const { user } = useAuth();
   const formatTime = (date?: Date | string) => {
     if (!date) return "";
     if (typeof date === "string") date = new Date(date);
@@ -29,7 +32,6 @@ export const ChatItem: React.FC<ChatItemProps> = ({
       return date.toLocaleDateString();
     }
   };
-
   return (
     <button
       onClick={onClick}
@@ -43,14 +45,14 @@ export const ChatItem: React.FC<ChatItemProps> = ({
         <div className="flex items-start gap-3 flex-1 overflow-hidden">
           {/* Avatar */}
           <div
-            className={`w-12 h-12  flex items-center justify-center font-bold shadow-[2px_2px_0px_0px_rgba(163,163,163,1)] text-white shrink-0 ${
+            className={`w-12 h-12 flex items-center justify-center font-bold text-white shrink-0 shadow-lg ${
               chat.type === "group" ? "bg-green-500" : "bg-orange-500"
             }`}
           >
-            {chat.type == "group" ? (
+            {chat.type === "group" ? (
               <Users className="h-6 w-6" />
             ) : (
-              (chat.name || "Group Chat")?.charAt(0).toUpperCase()
+              <div>{extractChatName(chat, user).charAt(0).toUpperCase()}</div>
             )}
           </div>
 
@@ -58,7 +60,7 @@ export const ChatItem: React.FC<ChatItemProps> = ({
           <div className="flex-1 min-w-0 overflow-hidden">
             <div className="flex items-center justify-between gap-2 overflow-hidden">
               <h3 className="font-bold text-neutral-900 truncate max-w-[70%]">
-                {chat.name || "Group Chat"}
+                {extractChatName(chat, user)}
               </h3>
               <span className="text-xs text-neutral-500 whitespace-nowrap shrink-0">
                 {chat.lastMessage && formatTime(chat.lastMessage?.createdAt)}
