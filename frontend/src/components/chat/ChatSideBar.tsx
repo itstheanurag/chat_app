@@ -5,6 +5,7 @@ import { useAuth } from "@/context/authContext";
 import type { BaseChat } from "@/types/chat";
 import { getUserChats } from "@/lib/apis/chat";
 import Modal from "./Modal";
+import { toast } from "react-toastify";
 
 interface ChatSidebarProps {
   selectedChatId?: string;
@@ -31,8 +32,9 @@ export const ChatSidebar: React.FC<ChatSidebarProps> = ({
           onSelectChat(res.data[0]._id);
         }
       }
-    } catch (err) {
-      console.error("Failed to fetch chats:", err);
+    } catch (err: unknown) {
+      // console.error("Failed to fetch chats:", err);
+      toast.error((err as any)?.message || "Failed to load chats");
     } finally {
       setLoading(false);
     }

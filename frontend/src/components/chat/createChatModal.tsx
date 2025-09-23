@@ -4,6 +4,7 @@ import { Search } from "lucide-react";
 import type { User } from "@/types/auth.type";
 import { searchUsers } from "@/lib/apis/user";
 import { createDirectChat, createGroupChat } from "@/lib/apis/chat";
+import { toast } from "react-toastify";
 
 interface ChatModalProps {
   isOpen: boolean;
@@ -37,8 +38,9 @@ export const ChatModal: React.FC<ChatModalProps> = ({
         const res = await searchUsers(query.trim());
         setResults(res?.data || []);
       } catch (err) {
-        console.error(err);
-        alert("Failed to fetch users");
+        // console.error(err);
+        // alert("Failed to fetch users");
+        toast.error((err as any)?.message || "failed to search users");
       } finally {
         setLoading(false);
       }
@@ -82,9 +84,10 @@ export const ChatModal: React.FC<ChatModalProps> = ({
       resetState();
       onClose();
     } catch (err) {
-      console.error(err);
-      alert("Failed to create chat");
+      // console.error(err);
+      // alert("Failed to create chat");
       setCreating(false);
+      toast.error((err as any)?.message || "Failed to create chat");
     }
   };
 

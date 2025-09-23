@@ -7,9 +7,8 @@ import ChatAvatar from "./ChatAvatar";
 
 interface ChatHeaderProps {
   chat: BaseChat;
-  onShowGroupInfo: () => void;
 }
-const ChatHeader: React.FC<ChatHeaderProps> = ({ chat, onShowGroupInfo }) => {
+const ChatHeader: React.FC<ChatHeaderProps> = ({ chat }) => {
   const { user } = useAuth();
   return (
     <div className="bg-sage-100 border-b-4 border-slate-900 p-6">
@@ -37,12 +36,9 @@ const ChatHeader: React.FC<ChatHeaderProps> = ({ chat, onShowGroupInfo }) => {
             <Video className="h-5 w-5" />
           </button>
           {chat?.type === "group" && (
-            <button
-              onClick={onShowGroupInfo}
-              className="p-3 text-slate-600 hover:text-slate-900 hover:bg-white border-2 border-transparent hover:border-slate-300 transition-all"
-            >
+            <div className="p-3 text-slate-600 hover:text-slate-900 hover:bg-white border-2 border-transparent hover:border-slate-300 transition-all">
               <Users className="h-5 w-5" />
-            </button>
+            </div>
           )}
           <button className="p-3 text-slate-600 hover:text-slate-900 hover:bg-white border-2 border-transparent hover:border-slate-300 transition-all">
             <MoreVertical className="h-5 w-5" />

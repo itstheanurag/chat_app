@@ -12,17 +12,17 @@ export const connectSocket = (token: string) => {
       withCredentials: true,
     });
 
-    socket.on("connect", () => {
-      console.log("✅ Connected to socket server:", socket?.id);
-    });
+    // socket.on("connect", () => {
+    //   console.log("✅ Connected to socket server:", socket?.id);
+    // });
 
-    socket.on("disconnect", (reason) => {
-      console.warn("❌ Disconnected:", reason);
-    });
+    // socket.on("disconnect", (reason) => {
+    //   console.warn("❌ Disconnected:", reason);
+    // });
 
-    socket.on("connect_error", (err) => {
-      console.error("❌ Connection Error:", err.message);
-    });
+    // socket.on("connect_error", (err) => {
+    //   console.error("❌ Connection Error:", err.message);
+    // });
   }
   return socket;
 };

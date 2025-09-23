@@ -6,15 +6,14 @@ import { Send } from "lucide-react";
 import { useAuth } from "@/context/authContext";
 import { getSocket } from "@/lib/socket/socket";
 import ChatHeader from "./ChatHeader";
+import { toast } from "react-toastify";
 
 interface ChatWindowProps {
   chatId: string;
-  onShowGroupInfo: () => void;
 }
 
 export const ChatWindow: React.FC<ChatWindowProps> = ({
   chatId,
-  onShowGroupInfo,
 }) => {
   const { user } = useAuth();
   const [messageInput, setMessageInput] = useState("");
@@ -43,7 +42,8 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
           setMessages(res.data.messages || []);
         }
       } catch (err) {
-        console.error("Failed to fetch chat:", err);
+        // console.error("Failed to fetch chat:", err);
+        toast.error((err as any)?.message || "Failed to load chats");
       }
     };
     if (chatId?.length === 24) fetchChats();
@@ -118,7 +118,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
 
   return (
     <div className="flex-1 flex flex-col h-full bg-white">
-      <ChatHeader chat={chat} onShowGroupInfo={onShowGroupInfo} />
+      <ChatHeader chat={chat} />
 
       {/* Messages */}
       <div className="flex-1 overflow-y-auto p-6 space-y-4">

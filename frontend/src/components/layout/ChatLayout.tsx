@@ -15,13 +15,8 @@ export const ChatLayout: React.FC = () => {
     if (!token) return;
     const socket = connectSocket(token);
     socket.on("connect", () => setIsConnected(true));
-    socket.on("message", (msg) => {
-      console.log("📩 New message:", msg);
-    });
-
     return () => {
       socket.off("connect");
-      socket.off("message");
       socket.disconnect();
       setIsConnected(false);
     };
@@ -37,7 +32,7 @@ export const ChatLayout: React.FC = () => {
       {selectedChatId ? (
         <ChatWindow
           chatId={selectedChatId}
-          onShowGroupInfo={() => console.log("Show group info")}
+  
         />
       ) : (
         <div className="flex-1 flex items-center justify-center bg-white border-r-4 border-slate-900">

@@ -88,7 +88,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       toast.success(result.message || "Logged in successfully");
       return result.data;
     } catch (err) {
-      console.error(err);
+      // console.error(err);
       toast.error("Unexpected error during login");
       setAuthState((prev) => ({ ...prev, isLoading: false }));
       return null;

@@ -22,7 +22,7 @@ export function extractErrorMessage(err: any, defaultMsg: string): string {
   return defaultMsg;
 }
 export const extractChatName = (chat?: BaseChat | null, user?: User | null) => {
-  console.log("Extracting chat name for chat:", chat, "and user:", user);
+  // console.log("Extracting chat name for chat:", chat, "and user:", user);
   if (!chat) return "Chat";
 
   if (chat.type === "group") return chat.name || "Group Chat";
@@ -32,7 +32,7 @@ export const extractChatName = (chat?: BaseChat | null, user?: User | null) => {
       (p) => p.userId?._id?.toString() !== user?.id
     );
 
-    console.log("Other Participant:", otherParticipant);
+    // console.log("Other Participant:", otherParticipant);
 
     return otherParticipant
       ? otherParticipant.userId?.name || "Unknown User"
