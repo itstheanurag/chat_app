@@ -55,7 +55,7 @@ export const register = async (
       otp
     );
 
-    console.log(`OTP for ${user.email}: ${otp}`);
+    // console.log(`OTP for ${user.email}: ${otp}`);
 
     return sendResponse(
       res,
@@ -165,7 +165,7 @@ export const searchUser = async (
 
     return sendResponse(res, 200, formatted, "Users fetched successfully");
   } catch (err) {
-    console.error("Search user error:", err);
+    // // console.error("Search user error:", err);
     return sendError(res, 500, "Failed to search users");
   }
 };
@@ -176,7 +176,7 @@ export const regreshTokenApiCall = async (
 ): Promise<Response> => {
   try {
     const user = req.user!;
-    console.log(user);
+    // // console.log(user);
 
     const accessToken = await generateAccessToken({
       id: user.id,
@@ -191,7 +191,7 @@ export const regreshTokenApiCall = async (
       "Tokens refreshed successfully"
     );
   } catch (err) {
-    console.error("Refresh token error:", err);
+    // // console.error("Refresh token error:", err);
     return sendError(res, 500, "Failed to refresh token");
   }
 };
@@ -212,7 +212,7 @@ export const logout = async (
 
     return sendResponse(res, 200, null, "Logged out successfully");
   } catch (err) {
-    console.error("Logout error:", err);
+    // console.error("Logout error:", err);
     return sendError(res, 500, "Failed to log out");
   }
 };
@@ -245,7 +245,7 @@ export const resendEmailVerificationToken = async (
       otp
     );
     // sendEmail(user.email, `Your verification code is ${otp}`);
-    console.log(email, `Your verification code is ${otp}`);
+    // console.log(email, `Your verification code is ${otp}`);
     return sendResponse(res, 200, { token, otp }, "Verification OTP resent");
   } catch (err) {
     return sendError(res, 500, err);

@@ -6,7 +6,7 @@ export function registerChatEvents(io: Server) {
   io.on("connection", (socket: AuthenticatedSocket) => {
     if (!socket.user) return;
 
-    console.log(`User connected: ${socket.user.name} (${socket.user.id})`);
+    // console.log(`User connected: ${socket.user.name} (${socket.user.id})`);
     /**
      * Join a chat room
      */
@@ -21,7 +21,7 @@ export function registerChatEvents(io: Server) {
 
         if (!isParticipant) return socket.emit("error", "Access denied");
         socket.join(chatId);
-        console.log(`${socket?.user?.name} joined chat ${chatId}`);
+        // console.log(`${socket?.user?.name} joined chat ${chatId}`);
         const messages = await Message.find({ chatId })
           .sort({ createdAt: -1 })
           .limit(20)
@@ -29,7 +29,7 @@ export function registerChatEvents(io: Server) {
 
         socket.emit("chatHistory", messages.reverse());
       } catch (err) {
-        console.error(err);
+        // console.error(err);
         socket.emit("error", "Failed to join chat");
       }
     });
@@ -44,7 +44,7 @@ export function registerChatEvents(io: Server) {
           const { chatId, text, senderId } = data;
           if (!text.trim()) return;
 
-          console.log(data);
+          // console.log(data);
 
           const chat = await Chat.findById(chatId);
           if (!chat) return socket.emit("error", "Chat not found");
@@ -72,7 +72,7 @@ export function registerChatEvents(io: Server) {
           await chat.save();
           io.to(chatId).emit("receiveMessage", newMessage);
         } catch (err) {
-          console.error(err);
+          // console.error(err);
           socket.emit("error", "Failed to send message");
         }
       }
@@ -83,7 +83,7 @@ export function registerChatEvents(io: Server) {
         const { chatId, username } = data;
         io.to(chatId).emit("userTyping", { username });
       } catch (err) {
-        console.error(err);
+        // console.error(err);
         socket.emit("error", "Failed to send message");
       }
     });
@@ -95,7 +95,7 @@ export function registerChatEvents(io: Server) {
           const { chatId, username } = data;
           io.to(chatId).emit("stopTyping", { username });
         } catch (err) {
-          console.error(err);
+          // console.error(err);
           socket.emit("error", "Failed to send message");
         }
       }
@@ -106,7 +106,7 @@ export function registerChatEvents(io: Server) {
      */
     socket.on("leaveChat", (chatId: string) => {
       socket.leave(chatId);
-      console.log(`${socket.user?.name} left chat ${chatId}`);
+      // console.log(`${socket.user?.name} left chat ${chatId}`);
     });
 
     socket.on("disconnect", (reason) => {

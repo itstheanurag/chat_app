@@ -5,7 +5,7 @@ export const allowedOrigins: string[] = (process.env.CORS_ORIGINS ?? "")
   .map((o) => o.trim())
   .filter((o) => o.length > 0);
 
-console.log(allowedOrigins);
+// console.log(allowedOrigins);
 export const allowedMethods: string[] = (process.env.CORS_METHODS ?? "")
   .split(",")
   .map((m) => m.trim())
@@ -21,13 +21,13 @@ if (
   !allowedMethods.length ||
   !allowedHeaders.length
 ) {
-  console.error("❌ Missing or invalid CORS configuration in .env");
+  // console.error("❌ Missing or invalid CORS configuration in .env");
   process.exit(1);
 }
 
 const corsOptions: CorsOptions = {
   origin: (origin, callback) => {
-    // console.log("origin", origin);
+    // // console.log("origin", origin);
     if (!origin || allowedOrigins.includes(origin!)) {
       callback(null, true);
     } else {

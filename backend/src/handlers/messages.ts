@@ -7,7 +7,7 @@ import { AuthenticatedRequest } from "middleware/auth";
 import { AuthenticatedSocket } from "lib/socket/socket";
 
 export function handleChatMessage(socket: AuthenticatedSocket, message: any) {
-  console.log(`📨 Message from ${socket.user?.name || "Unknown"}:`, message);
+  // console.log(`📨 Message from ${socket.user?.name || "Unknown"}:`, message);
 
   const chatMessage = {
     user: socket.user?.name || "Anonymous",

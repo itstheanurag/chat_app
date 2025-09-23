@@ -31,19 +31,19 @@ export async function auth(
 ): Promise<Response | void> {
   const secret = process.env.JWT_ACCESS_SECRET!;
   if (!secret) {
-    console.error("JWT_SECRET is not configured");
+    // console.error("JWT_SECRET is not configured");
     return sendError(res, 500, "Server configuration error");
   }
 
   const authHeader = req.get("Authorization");
   if (!authHeader?.startsWith("Bearer ")) {
-    console.log("token doesn't start with Authorization");
+    // console.log("token doesn't start with Authorization");
     return sendError(res, 401, "Authorization token missing or invalid");
   }
 
   const token = authHeader.split(" ")[1];
   if (!token) {
-    console.log("token is missing", token);
+    // console.log("token is missing", token);
     return sendError(res, 401, "Authorization token missing or invalid");
   }
 
@@ -65,7 +65,7 @@ export async function auth(
     req.user = decoded;
     next();
   } catch (err) {
-    console.error("JWT verification failed:", err);
+    // console.error("JWT verification failed:", err);
     return sendError(res, 403, "Invalid or expired token");
   }
 }
@@ -75,7 +75,7 @@ export async function refreshTokenGuard(
   res: Response,
   next: NextFunction
 ): Promise<Response | void> {
-  const secret = process.env.JWT_REFRESH_SECRET;
+  const secret = process.env.JWT_REFRESH_SECRET!;
 
   if (!secret) {
     return sendError(res, 500, "Server configuration error");
@@ -103,7 +103,7 @@ export async function refreshTokenGuard(
     req.user = decoded;
     next();
   } catch (err) {
-    console.error("Refresh token verification failed:", err);
+    // console.error("Refresh token verification failed:", err);
     return sendError(res, 403, "Invalid or expired refresh token");
   }
 }

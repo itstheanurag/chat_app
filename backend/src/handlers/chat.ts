@@ -65,7 +65,7 @@ export const createChat = async (
       return sendResponse(res, 201, newChat, "Chat created successfully");
     }
   } catch (err: any) {
-    console.error(err);
+    // console.error(err);
     return sendError(res, 500, err.message || "Failed to create chat");
   }
 };
@@ -87,7 +87,7 @@ export const listUserChats = async (
 
     return sendResponse(res, 200, userChats, "Chats retrieved successfully");
   } catch (err: any) {
-    console.error(err);
+    // console.error(err);
     return sendError(res, 400, err.message || "Failed to fetch user chats");
   }
 };
@@ -106,7 +106,7 @@ export const listUsersArchivedChats = async (
 
     return sendResponse(res, 200, userChats, "Chats retrieved successfully");
   } catch (err: any) {
-    console.error(err);
+    // console.error(err);
     return sendError(res, 400, err.message || "Failed to fetch user chats");
   }
 };
@@ -131,7 +131,7 @@ export const archiveChat = async (
 
     return sendResponse(res, 200, chat, "Chat archived successfully");
   } catch (err) {
-    console.error(err);
+    // console.error(err);
     return sendError(res, 500, "Failed to archive chat");
   }
 };
@@ -156,7 +156,7 @@ export const unarchiveChat = async (
 
     return sendResponse(res, 200, chat, "Chat unarchived successfully");
   } catch (err) {
-    console.error(err);
+    // console.error(err);
     return sendError(res, 500, "Failed to unarchive chat");
   }
 };
@@ -219,7 +219,7 @@ export const addUsersToGroupChat = async (
     await chat.save();
     return sendResponse(res, 200, chat, "Users added to the group chat");
   } catch (err: any) {
-    console.error(err);
+    // console.error(err);
     return sendError(res, 500, err.message || "Failed to add users to chat");
   }
 };
@@ -264,7 +264,7 @@ export const removeUsersFromGroupChat = async (
     await chat.save();
     return sendResponse(res, 200, chat, "Users removed from the group chat");
   } catch (err: any) {
-    console.error(err);
+    // console.error(err);
     return sendError(
       res,
       500,
@@ -341,7 +341,7 @@ export const findChatById = async (
       "Chat retrieved successfully"
     );
   } catch (err: any) {
-    console.error(err);
+    // console.error(err);
     return sendError(res, 500, err.message || "Failed to fetch chat");
   }
 };
