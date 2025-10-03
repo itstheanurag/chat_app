@@ -1,14 +1,14 @@
 import api from "../axios";
-import type { User } from "@/types/auth.type"; // or your User type
+import type { User } from "@/types/auth.type"; 
 import { formatApiError, extractErrorMessage } from "@/utils/formatter";
-import { toast } from "react-toastify";
+import { errorToast } from "../toast";
 
 export async function searchUsers(
   q: string
 ): Promise<{ success: boolean; data?: User[]; message?: string }> {
   try {
     const response = await api.get("/user/search", {
-      params: { q }, // <-- corrected here
+      params: { q },
     });
 
     if (response.data?.success === false) {
@@ -16,13 +16,13 @@ export async function searchUsers(
         response.data.error,
         "Failed to fetch users."
       );
-      toast.error(formattedError);
+      errorToast(formattedError);
       return { success: false, message: formattedError };
     }
 
     return {
       success: true,
-      data: response.data.data, // the array of users
+      data: response.data.data, 
       message: response.data.message || "Users fetched successfully",
     };
   } catch (err: unknown) {
@@ -30,7 +30,8 @@ export async function searchUsers(
       err,
       "Unexpected error during user search."
     );
-    toast.error(formattedError);
+
+    errorToast(formattedError);
     return { success: false, message: formattedError };
   }
 }

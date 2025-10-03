@@ -7,7 +7,7 @@ import type {
 } from "@/types/chat";
 import { formatApiError, extractErrorMessage } from "@/utils/formatter";
 import api from "../axios";
-import { toast } from "react-toastify";
+import { errorToast, successToast } from "../toast";
 
 /**
  * Fetch user chats from the backend.
@@ -60,7 +60,7 @@ export async function createDirectChat(
         response.data?.error,
         "Failed to create direct chat."
       );
-      toast.error(formattedError);
+      errorToast(formattedError);
       return { success: false, message: formattedError };
     }
 
@@ -70,7 +70,7 @@ export async function createDirectChat(
       data: BaseChat;
     };
 
-    toast.success(message);
+    successToast(message);
     return { success: true, message, data };
   } catch (err: any) {
     const formattedError = extractErrorMessage(
@@ -102,7 +102,7 @@ export async function createGroupChat(
         response.data?.error,
         "Failed to create group chat."
       );
-      toast.error(formattedError);
+      errorToast(formattedError);
       return { success: false, message: formattedError };
     }
 
@@ -112,7 +112,7 @@ export async function createGroupChat(
       data: BaseChat;
     };
 
-    toast.success(message);
+    successToast(message);
 
     return { success: true, message, data };
   } catch (err: any) {
@@ -140,7 +140,7 @@ export async function findChatById(
         response.data?.error,
         "Failed to fetch chat details."
       );
-      toast.error(formattedError);
+      errorToast(formattedError);
       return { success: false, message: formattedError };
     }
 
@@ -151,7 +151,7 @@ export async function findChatById(
       err,
       "Unexpected error while fetching chat details."
     );
-    toast.error(formattedError);
+    errorToast(formattedError);
     return { success: false, message: formattedError };
   }
 }

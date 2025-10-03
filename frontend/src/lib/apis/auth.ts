@@ -1,10 +1,10 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import { toast } from "react-toastify";
 import { formatApiError, extractErrorMessage } from "@/utils/formatter";
 import type { LoginResult, RegisterResponse } from "@/types/auth.type";
-import api from "../axios";
 import { flushLocalTokens, removeToken, saveToken } from "../storage";
+import { errorToast, successToast } from "../toast";
+import api from "../axios";
 
 export async function callLoginUserApi(
   email: string,
@@ -25,9 +25,6 @@ export async function callLoginUserApi(
     const tokens = data?.tokens;
     if (tokens?.accessToken) saveToken("accessToken", tokens.accessToken);
     if (tokens?.refreshToken) saveToken("refreshToken", tokens.refreshToken);
-
-    // console.log("Login successful, tokens saved.", response.data);
-
     return { success: true, message, data };
   } catch (err: any) {
     const formattedError = extractErrorMessage(
@@ -48,16 +45,16 @@ export async function callLogoutUserApi(): Promise<void> {
         response.data.error,
         "Logout failed."
       );
-      toast.error(formattedError);
+      errorToast(formattedError);
     } else {
-      toast.success(response.data?.message || "Logged out successfully!");
+      successToast(response.data?.message || "Logged out successfully!");
     }
   } catch (err: any) {
     const formattedError = extractErrorMessage(
       err,
       "Unexpected error during logout."
     );
-    toast.error(formattedError);
+    errorToast(formattedError);
   } finally {
     flushLocalTokens();
   }
@@ -80,14 +77,14 @@ export async function callRegisterUserApi(
         response.data.error,
         "Registration failed."
       );
-      toast.error(formattedError);
+      errorToast(formattedError);
       return { success: false, message: formattedError };
     }
 
     const message =
       response.data?.message ||
       "Registration triggered, please validate your email";
-    toast.success(message);
+    successToast(message);
 
     const { data } = response.data;
 
@@ -103,7 +100,7 @@ export async function callRegisterUserApi(
       err,
       "Unexpected error during registration."
     );
-    toast.error(formattedError);
+    errorToast(formattedError);
     return { success: false, message: formattedError };
   }
 }
@@ -123,14 +120,14 @@ export async function callVerifyUserEmailApi(
         response.data.error,
         "Registration failed."
       );
-      toast.error(formattedError);
+      errorToast(formattedError);
       return { success: false, message: formattedError };
     }
 
     const message =
       response.data?.message ||
       "Registration triggered, please validate your email";
-    toast.success(message);
+    successToast(message);
 
     const { data } = response.data;
     removeToken("emailVerificationToken");
@@ -144,7 +141,7 @@ export async function callVerifyUserEmailApi(
       err,
       "Unexpected error during registration."
     );
-    toast.error(formattedError);
+    errorToast(formattedError);
     return { success: false, message: formattedError };
   }
 }
