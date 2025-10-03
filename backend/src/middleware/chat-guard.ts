@@ -1,17 +1,11 @@
-// middleware/chatGuard.ts
-import { type Request, type Response, type NextFunction } from "express";
-import { Chat } from "models"; // adjust to your chat model path
+import { type Response, type NextFunction } from "express";
+import { Chat } from "models";
 import { sendError } from "lib/response";
 import { AuthenticatedRequest } from "./auth";
 import mongoose from "mongoose";
-/**
- * Ensures:
- * - User is part of the chat.
- * - If chat is a group, only the admin can update/delete.
- */
 
 interface ChatGuardOptions {
-  requireAdmin?: boolean; // default false
+  requireAdmin?: boolean;
 }
 
 export const chatGuard = (options: ChatGuardOptions = {}) => {

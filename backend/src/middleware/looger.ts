@@ -6,7 +6,6 @@ export const apiLogger = (req: Request, res: Response, next: NextFunction) => {
     `➡️  [${new Date().toISOString()}] ${req.method} ${req.originalUrl}`
   );
 
-  // When response is finished, log status code and duration
   res.on("finish", () => {
     const duration = Date.now() - startTime;
     console.log(
