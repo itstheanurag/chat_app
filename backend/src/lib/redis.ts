@@ -10,4 +10,3 @@ export const redisClient: RedisClientType = createClient({
   url: process.env.REDIS_URI || "redis://localhost:6379",
 });
 
-// console.log( process.env.REDIS_URI)

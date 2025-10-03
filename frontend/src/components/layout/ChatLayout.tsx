@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { MessageSquare } from "lucide-react";
 import { ChatSidebar } from "../chat/ChatSideBar";
 import { ChatWindow } from "../chat/ChatWindow";
-import { connectSocket } from "@/lib/socket/socket";
+import { connectSocket } from "@/lib/socket";
 import { getToken } from "@/lib/storage";
 
 export const ChatLayout: React.FC = () => {
@@ -30,10 +30,7 @@ export const ChatLayout: React.FC = () => {
       />
 
       {selectedChatId ? (
-        <ChatWindow
-          chatId={selectedChatId}
-  
-        />
+        <ChatWindow chatId={selectedChatId} />
       ) : (
         <div className="flex-1 flex items-center justify-center bg-white border-r-4 border-slate-900">
           <div className="text-center">

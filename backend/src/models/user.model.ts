@@ -40,7 +40,6 @@ const schema: Schema<IUser> = new Schema(
   { timestamps: true },
 );
 
-// Hash password before saving
 schema.pre('save', async function (next) {
   if (!this.isModified('password')) return next();
   const salt = await bcrypt.genSalt(10);
@@ -48,7 +47,6 @@ schema.pre('save', async function (next) {
   next();
 });
 
-// Method to compare passwords
 schema.methods.comparePassword = function (candidatePassword: string) {
   return bcrypt.compare(candidatePassword, this.password);
 };

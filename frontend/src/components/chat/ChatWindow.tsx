@@ -4,7 +4,7 @@ import { MessageBubble } from "./MessageBubble";
 import { findChatById } from "@/lib/apis/chat";
 import { Send } from "lucide-react";
 import { useAuth } from "@/context/authContext";
-import { getSocket } from "@/lib/socket/socket";
+import { getSocket } from "@/lib/socket";
 import ChatHeader from "./ChatHeader";
 import { toast } from "react-toastify";
 
@@ -12,9 +12,7 @@ interface ChatWindowProps {
   chatId: string;
 }
 
-export const ChatWindow: React.FC<ChatWindowProps> = ({
-  chatId,
-}) => {
+export const ChatWindow: React.FC<ChatWindowProps> = ({ chatId }) => {
   const { user } = useAuth();
   const [messageInput, setMessageInput] = useState("");
   const [messages, setMessages] = useState<Message[]>([]);
