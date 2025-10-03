@@ -12,7 +12,7 @@ import { errorToast, successToast } from "../toast";
 /**
  * Fetch user chats from the backend.
  */
-export async function getUserChats(): Promise<GetUserChatsResult> {
+export async function callGetUserChatsApi(): Promise<GetUserChatsResult> {
   try {
     const response = await api.get("/chats");
 
@@ -46,7 +46,7 @@ export async function getUserChats(): Promise<GetUserChatsResult> {
  * @param participantId - The userId of the participant to include in the direct chat.
  * @returns A result object containing the newly created chat or an error message.
  */
-export async function createDirectChat(
+export async function callCreateDirectChatApi(
   participantId: string
 ): Promise<CreateDirectChatResult> {
   try {
@@ -86,7 +86,7 @@ export async function createDirectChat(
  * @param participantId - The userId of the participant to include in the direct chat.
  * @returns A result object containing the newly created chat or an error message.
  */
-export async function createGroupChat(
+export async function callCreateGroupChatApi(
   participantIds: string[],
   name: string
 ): Promise<CreateDirectChatResult> {
@@ -129,7 +129,7 @@ export async function createGroupChat(
  * @param id - The ID of the chat to fetch.
  * @returns A result object containing the chat or an error message.
  */
-export async function findChatById(
+export async function callFindChatByIdApi(
   chatId: string
 ): Promise<FindChatByIdResult> {
   try {

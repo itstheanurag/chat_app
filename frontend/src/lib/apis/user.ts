@@ -1,9 +1,9 @@
 import api from "../axios";
-import type { User } from "@/types/auth.type"; 
+import type { User } from "@/types/auth.type";
 import { formatApiError, extractErrorMessage } from "@/utils/formatter";
 import { errorToast } from "../toast";
 
-export async function searchUsers(
+export async function callSearchUsersApi(
   q: string
 ): Promise<{ success: boolean; data?: User[]; message?: string }> {
   try {
@@ -22,7 +22,7 @@ export async function searchUsers(
 
     return {
       success: true,
-      data: response.data.data, 
+      data: response.data.data,
       message: response.data.message || "Users fetched successfully",
     };
   } catch (err: unknown) {

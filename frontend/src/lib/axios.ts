@@ -1,13 +1,14 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import axios, { AxiosError } from "axios";
 import { flushLocalTokens, getToken, saveToken } from "./storage";
+import { errorToast } from "./toast";
+
+const BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 console.log(
   "import.meta.env.VITE_API_BASE_URL,",
   import.meta.env.VITE_API_BASE_URL
 );
-const BASE_URL =
-  import.meta.env.VITE_API_BASE_URL || "http://localhost:3000/api/v1";
 
 const api = axios.create({
   baseURL: BASE_URL,
@@ -38,6 +39,20 @@ api.interceptors.response.use(
   (response) => response,
   async (error: AxiosError) => {
     const originalRequest: any = error.config;
+
+    if (!error.response) {
+      console.error("Network or CORS error:", error.message);
+      errorToast(
+        "Network error or server is unreachable. Please check your connection."
+      );
+      return Promise.reject(error);
+    }
+
+    if (error.response.status >= 500) {
+      console.error("Server error:", error.response.statusText);
+      errorToast("Server error. Please try again later.");
+      return Promise.reject(error);
+    }
 
     if (originalRequest.url?.includes("/auth/refresh")) {
       return Promise.reject(error);

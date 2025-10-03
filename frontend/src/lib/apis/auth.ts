@@ -31,7 +31,6 @@ export async function callLoginUserApi(
       err,
       "Unexpected error during logout."
     );
-
     return { success: false, message: formattedError };
   }
 }
@@ -87,9 +86,7 @@ export async function callRegisterUserApi(
     successToast(message);
 
     const { data } = response.data;
-
     saveToken("emailVerificationToken", data.verificationToken);
-
     return {
       success: true,
       message,

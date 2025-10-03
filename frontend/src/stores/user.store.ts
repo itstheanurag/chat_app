@@ -7,6 +7,8 @@ import {
   callLogoutUserApi,
   callRegisterUserApi,
   callVerifyUserEmailApi,
+  errorToast,
+  successToast,
 } from "@/lib";
 
 interface AuthStore extends AuthState {
@@ -59,11 +61,10 @@ export const useAuthStore = create<AuthStore>((set) => ({
       saveUser(user);
 
       set({ user, isAuthenticated: true, isLoading: false });
-
-      toast.success(result.message || "Logged in successfully");
+      successToast(result.message || "Logged in successfully");
       return user;
     } catch {
-      toast.error("Unexpected error during login");
+      errorToast("Unexpected error during login");
       set({ isLoading: false });
       return null;
     }
