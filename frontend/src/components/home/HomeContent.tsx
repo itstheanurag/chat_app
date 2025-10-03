@@ -5,9 +5,9 @@ import MainCard from "./MainCard";
 
 export default function HomeContent() {
   const navigate = useNavigate();
-
   const onLogin = () => navigate("/login");
   const onSignup = () => navigate("/register");
+  
   return (
     <main className="space-y-16">
       <HeroSection />

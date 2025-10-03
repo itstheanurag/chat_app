@@ -2,8 +2,15 @@
 import axios, { AxiosError } from "axios";
 import { flushLocalTokens, getToken, saveToken } from "./storage";
 
+console.log(
+  "import.meta.env.VITE_API_BASE_URL,",
+  import.meta.env.VITE_API_BASE_URL
+);
+const BASE_URL =
+  import.meta.env.VITE_API_BASE_URL || "http://localhost:3000/api/v1";
+
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL,
+  baseURL: BASE_URL,
   timeout: 10000,
   headers: {
     "Content-Type": "application/json",
@@ -54,10 +61,9 @@ api.interceptors.response.use(
         const refreshToken = getToken("refreshToken");
         if (!refreshToken) throw new Error("No refresh token available");
 
-        const { data } = await axios.post(
-          `${import.meta.env.VITE_API_BASE_URL}/auth/refresh`,
-          { token: refreshToken }
-        );
+        const { data } = await axios.post(`/auth/refresh`, {
+          token: refreshToken,
+        });
 
         const newAccessToken = data.data?.accessToken;
         if (!newAccessToken) throw new Error("Failed to refresh token");
@@ -65,14 +71,12 @@ api.interceptors.response.use(
         saveToken("accessToken", newAccessToken);
         api.defaults.headers.common.Authorization = `Bearer ${newAccessToken}`;
 
-        // Retry all queued requests
         failedQueue.forEach((req) => {
           req.config.headers.Authorization = `Bearer ${newAccessToken}`;
           req.resolve(api(req.config));
         });
         failedQueue = [];
 
-        // Retry the original request
         return api({
           ...originalRequest,
           headers: {

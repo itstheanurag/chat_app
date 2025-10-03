@@ -1,8 +1,8 @@
 import React from "react";
-import { Users, Check, CheckCheck } from "lucide-react";
+import { Users } from "lucide-react";
 import type { BaseChat } from "@/types/chat";
-import { useAuth } from "@/context/authContext";
 import { extractChatName } from "@/utils/formatter";
+import { useAuthStore } from "@/stores/user.store";
 
 interface ChatItemProps {
   chat: BaseChat;
@@ -15,7 +15,7 @@ export const ChatItem: React.FC<ChatItemProps> = ({
   isSelected,
   onClick,
 }) => {
-  const { user } = useAuth();
+  const { user } = useAuthStore();
   const formatTime = (date?: Date | string) => {
     if (!date) return "";
     if (typeof date === "string") date = new Date(date);

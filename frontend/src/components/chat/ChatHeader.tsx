@@ -1,15 +1,15 @@
-import { useAuth } from "@/context/authContext";
 import type { BaseChat } from "@/types";
 import { extractChatName } from "@/utils/formatter";
 import { Users, Phone, Video, MoreVertical } from "lucide-react";
 import React from "react";
 import ChatAvatar from "./ChatAvatar";
+import { useAuthStore } from "@/stores/user.store";
 
 interface ChatHeaderProps {
   chat: BaseChat;
 }
 const ChatHeader: React.FC<ChatHeaderProps> = ({ chat }) => {
-  const { user } = useAuth();
+  const { user } = useAuthStore();
   return (
     <div className="bg-sage-100 border-b-4 border-slate-900 p-6">
       <div className="flex items-center justify-between">

@@ -6,7 +6,7 @@ import type { LoginResult, RegisterResponse } from "@/types/auth.type";
 import api from "../axios";
 import { flushLocalTokens, removeToken, saveToken } from "../storage";
 
-export async function loginUser(
+export async function callLoginUserApi(
   email: string,
   password: string
 ): Promise<LoginResult> {
@@ -39,7 +39,7 @@ export async function loginUser(
   }
 }
 
-export async function logoutUser(): Promise<void> {
+export async function callLogoutUserApi(): Promise<void> {
   try {
     const response = await api.post("/auth/logout");
 
@@ -63,7 +63,7 @@ export async function logoutUser(): Promise<void> {
   }
 }
 
-export async function registerUser(
+export async function callRegisterUserApi(
   email: string,
   password: string,
   name: string
@@ -108,7 +108,7 @@ export async function registerUser(
   }
 }
 
-export async function verifyUserEmail(
+export async function callVerifyUserEmailApi(
   token: string,
   otp: string
 ): Promise<RegisterResponse> {

@@ -1,13 +1,13 @@
 import React, { useState } from "react";
 import { Mail } from "lucide-react";
-import { useAuth } from "@/context/authContext";
 import Button from "../ui/Button";
 import { useNavigate } from "react-router-dom";
 import { getToken } from "@/lib/storage";
+import { useAuthStore } from "@/stores/user.store";
 
 export const VerifyEmailForm: React.FC = () => {
   const [verificationCode, setVerificationCode] = useState("");
-  const { verifyEmail, isLoading } = useAuth();
+  const { verifyEmail, isLoading } = useAuthStore();
   const navigate = useNavigate();
 
   const token = getToken("emailVerificationToken");

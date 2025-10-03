@@ -1,8 +1,8 @@
 import React, { useState } from "react";
 import { Mail, Lock, User, Eye, EyeOff } from "lucide-react";
-import { useAuth } from "@/context/authContext";
 import Button from "../ui/Button";
 import { useNavigate } from "react-router-dom";
+import { useAuthStore } from "@/stores/user.store";
 
 export const RegisterForm: React.FC = () => {
   const [formData, setFormData] = useState({
@@ -11,7 +11,8 @@ export const RegisterForm: React.FC = () => {
     password: "",
   });
   const [showPassword, setShowPassword] = useState(false);
-  const { register, isLoading } = useAuth();
+
+  const { register, isLoading } = useAuthStore();
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {

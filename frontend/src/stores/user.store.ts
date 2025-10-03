@@ -1,13 +1,13 @@
 import { create } from "zustand";
 import type { AuthState, User } from "@/types";
-import {
-  loginUser,
-  logoutUser,
-  registerUser,
-  verifyUserEmail,
-} from "@/lib/apis/auth";
 import { toast } from "react-toastify";
 import { getToken, getUser, removeUser, saveUser } from "@/lib/storage";
+import {
+  callLoginUserApi,
+  callLogoutUserApi,
+  callRegisterUserApi,
+  callVerifyUserEmailApi,
+} from "@/lib";
 
 interface AuthStore extends AuthState {
   login: (email: string, password: string) => Promise<User | null>;
@@ -37,7 +37,7 @@ export const useAuthStore = create<AuthStore>((set) => ({
   login: async (email, password) => {
     set({ isLoading: true });
     try {
-      const result = await loginUser(email, password);
+      const result = await callLoginUserApi(email, password);
 
       if (!result.success) {
         toast.error(result.message || "Login failed");
@@ -72,19 +72,19 @@ export const useAuthStore = create<AuthStore>((set) => ({
   register: async (email, password, name) => {
     set({ isLoading: true });
     try {
-      await registerUser(email, password, name);
+      await callRegisterUserApi(email, password, name);
     } finally {
       set({ isLoading: false });
     }
   },
 
   logout: () => {
-    logoutUser();
+    callLogoutUserApi();
     removeUser();
     set({ user: null, isAuthenticated: false, isLoading: false });
   },
 
   verifyEmail: async (token, otp) => {
-    await verifyUserEmail(token, otp);
+    await callVerifyUserEmailApi(token, otp);
   },
 }));
