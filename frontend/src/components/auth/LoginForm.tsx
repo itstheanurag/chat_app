@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Mail, Lock, Eye, EyeOff } from "lucide-react";
 import Button from "../ui/Button";
 import { useNavigate } from "react-router-dom";
-import { useAuthStore } from "@/stores/user.store";
+import { useAuthStore } from "@/stores";
 
 export const LoginForm: React.FC = () => {
   const [email, setEmail] = useState("");

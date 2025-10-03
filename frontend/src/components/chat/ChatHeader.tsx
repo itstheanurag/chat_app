@@ -3,13 +3,25 @@ import { extractChatName } from "@/utils/formatter";
 import { Users, Phone, Video, MoreVertical } from "lucide-react";
 import React from "react";
 import ChatAvatar from "./ChatAvatar";
-import { useAuthStore } from "@/stores/user.store";
+import { useAuthStore } from "@/stores";
 
 interface ChatHeaderProps {
-  chat: BaseChat;
+  chat?: BaseChat | null;
 }
+
 const ChatHeader: React.FC<ChatHeaderProps> = ({ chat }) => {
   const { user } = useAuthStore();
+
+  if (!chat) {
+    return (
+      <div className="bg-sage-100 border-b-4 border-slate-900 p-6 flex items-center justify-center">
+        <p className="text-slate-600 italic">
+          No active chat. Select a conversation or start a new one.
+        </p>
+      </div>
+    );
+  }
+
   return (
     <div className="bg-sage-100 border-b-4 border-slate-900 p-6">
       <div className="flex items-center justify-between">
@@ -21,8 +33,8 @@ const ChatHeader: React.FC<ChatHeaderProps> = ({ chat }) => {
               {extractChatName(chat, user)}
             </h2>
             <p className="text-sm text-slate-600">
-              {chat?.type === "group"
-                ? `${chat?.participants?.length} members`
+              {chat.type === "group"
+                ? `${chat.participants?.length} members`
                 : "Online"}
             </p>
           </div>
@@ -35,7 +47,7 @@ const ChatHeader: React.FC<ChatHeaderProps> = ({ chat }) => {
           <button className="p-3 text-slate-600 hover:text-slate-900 hover:bg-white border-2 border-transparent hover:border-slate-300 transition-all">
             <Video className="h-5 w-5" />
           </button>
-          {chat?.type === "group" && (
+          {chat.type === "group" && (
             <div className="p-3 text-slate-600 hover:text-slate-900 hover:bg-white border-2 border-transparent hover:border-slate-300 transition-all">
               <Users className="h-5 w-5" />
             </div>

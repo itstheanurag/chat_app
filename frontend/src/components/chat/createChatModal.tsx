@@ -2,9 +2,12 @@ import React, { useEffect, useState } from "react";
 import Button from "../ui/Button";
 import { Search } from "lucide-react";
 import type { User } from "@/types/auth.type";
-import { searchUsers } from "@/lib/apis/user";
-import { createDirectChat, createGroupChat } from "@/lib/apis/chat";
 import { toast } from "react-toastify";
+import {
+  callCreateDirectChatApi,
+  callCreateGroupChatApi,
+  callSearchUsersApi,
+} from "@/lib";
 
 interface ChatModalProps {
   isOpen: boolean;
@@ -35,7 +38,7 @@ export const ChatModal: React.FC<ChatModalProps> = ({
     const timer = setTimeout(async () => {
       setLoading(true);
       try {
-        const res = await searchUsers(query.trim());
+        const res = await callSearchUsersApi(query.trim());
         setResults(res?.data || []);
       } catch (err) {
         // console.error(err);
@@ -71,21 +74,19 @@ export const ChatModal: React.FC<ChatModalProps> = ({
     try {
       if (type === "direct") {
         const participant = selectedUsers[0];
-        await createDirectChat(participant.id);
+        await callCreateDirectChatApi(participant.id);
       } else {
         if (!groupName.trim()) {
           setCreating(false);
           return alert("Please enter a group name");
         }
         const ids = selectedUsers.map((u) => u.id);
-        await createGroupChat(ids, groupName);
+        await callCreateGroupChatApi(ids, groupName);
       }
       onChatCreated();
       resetState();
       onClose();
     } catch (err) {
-      // console.error(err);
-      // alert("Failed to create chat");
       setCreating(false);
       toast.error((err as any)?.message || "Failed to create chat");
     }

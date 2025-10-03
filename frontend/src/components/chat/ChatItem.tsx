@@ -2,7 +2,7 @@ import React from "react";
 import { Users } from "lucide-react";
 import type { BaseChat } from "@/types/chat";
 import { extractChatName } from "@/utils/formatter";
-import { useAuthStore } from "@/stores/user.store";
+import { useAuthStore } from "@/stores";
 
 interface ChatItemProps {
   chat: BaseChat;

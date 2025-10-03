@@ -1,11 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { MessageCircle } from "lucide-react";
 import { ChatItem } from "./ChatItem";
-import type { BaseChat } from "@/types/chat";
-import { getUserChats } from "@/lib/apis/chat";
 import Modal from "./Modal";
-import { toast } from "react-toastify";
-import { useAuthStore } from "@/stores/user.store";
+import { useAuthStore, useChatStore } from "@/stores";
 
 interface ChatSidebarProps {
   selectedChatId?: string;
@@ -17,44 +14,29 @@ export const ChatSidebar: React.FC<ChatSidebarProps> = ({
   onSelectChat,
 }) => {
   const { user, logout } = useAuthStore();
-
-  const [isLoading, setLoading] = useState<boolean>(true);
-  const [chats, setChats] = useState<BaseChat[]>([]);
-  const [menuOpen, setMenuOpen] = useState<boolean>(false);
-
-  const fetchChats = async () => {
-    try {
-      setLoading(true);
-      const res = await getUserChats();
-      if (res.success && Array.isArray(res.data)) {
-        setChats(res.data);
-        if (res.data.length > 0) {
-          onSelectChat(res.data[0]._id);
-        }
-      }
-    } catch (err: unknown) {
-      toast.error((err as any)?.message || "Failed to load chats");
-    } finally {
-      setLoading(false);
-    }
-  };
-
+  const { chats, fetchChats, isLoading } = useChatStore();
+  const [menuOpen, setMenuOpen] = useState(false);
   useEffect(() => {
-    fetchChats();
-  }, [user]);
+    (async () => {
+      await fetchChats();
+    })();
+  }, [user, fetchChats]);
 
   return (
     <div className="w-100 bg-white border-r-4 border-neutral-900 flex flex-col h-full overflow-x-hidden">
       <Modal onChatCreated={fetchChats} />
+
       {/* Chat list */}
       <div className="flex-1 overflow-y-auto">
         <div className="p-4">
-          {chats.length > 0 ? (
+          {isLoading ? (
+            <p className="text-center text-neutral-500">Loading chats...</p>
+          ) : chats.length > 0 ? (
             <div className="space-y-2">
-              {chats.map((chat: BaseChat) => (
+              {chats.map((chat) => (
                 <ChatItem
                   key={chat._id}
-                  chat={{ ...chat }}
+                  chat={chat}
                   isSelected={selectedChatId === chat._id}
                   onClick={() => onSelectChat(chat._id)}
                 />

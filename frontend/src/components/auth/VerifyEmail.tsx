@@ -3,15 +3,13 @@ import { Mail } from "lucide-react";
 import Button from "../ui/Button";
 import { useNavigate } from "react-router-dom";
 import { getToken } from "@/lib/storage";
-import { useAuthStore } from "@/stores/user.store";
+import { useAuthStore } from "@/stores";
 
 export const VerifyEmailForm: React.FC = () => {
   const [verificationCode, setVerificationCode] = useState("");
   const { verifyEmail, isLoading } = useAuthStore();
   const navigate = useNavigate();
-
   const token = getToken("emailVerificationToken");
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!token) return;
