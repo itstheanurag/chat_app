@@ -5,11 +5,6 @@ import { errorToast } from "./toast";
 
 const BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
-console.log(
-  "import.meta.env.VITE_API_BASE_URL,",
-  import.meta.env.VITE_API_BASE_URL
-);
-
 const api = axios.create({
   baseURL: BASE_URL,
   timeout: 10000,
@@ -49,7 +44,6 @@ api.interceptors.response.use(
     }
 
     if (error.response.status >= 500) {
-      console.error("Server error:", error.response.statusText);
       errorToast("Server error. Please try again later.");
       return Promise.reject(error);
     }

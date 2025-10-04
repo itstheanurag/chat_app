@@ -1,40 +1,46 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { formatApiError, extractErrorMessage } from "@/utils/formatter";
-import type {
-  ErrorResponse,
-  LoginResult,
-  RegisterResponse,
-} from "@/types/auth.type";
+import type { LoginResult, RegisterResponse } from "@/types/auth.type";
 import { flushLocalTokens, removeToken, saveToken } from "../storage";
 import { errorToast, successToast } from "../toast";
 import api from "../axios";
+import type { ServerResponse } from "@/types";
 
 export async function callLoginUserApi(
   email: string,
   password: string
-): Promise<LoginResult | ErrorResponse> {
+): Promise<ServerResponse<LoginResult>> {
   try {
-    const response = await api.post("/auth/login", { email, password });
+    const response = await api.post<ServerResponse<LoginResult>>(
+      "/auth/login",
+      { email, password }
+    );
 
-    console.log("response", response);
+    const resData = response.data;
 
-    if (!response.success) {
-      const formattedError = formatApiError(response.error, "Logout failed.");
-      return { success: false, message: formattedError };
+    if (!resData.success) {
+      return { success: false, error: resData.error };
     }
 
-    const { message = "Login successful!", data } = response.data;
-    const tokens = data?.tokens;
-    if (tokens?.accessToken) saveToken("accessToken", tokens.accessToken);
-    if (tokens?.refreshToken) saveToken("refreshToken", tokens.refreshToken);
-    return { success: true, message, data };
+    const { data } = resData;
+    if (data?.tokens?.accessToken)
+      saveToken("accessToken", data?.tokens?.accessToken);
+    if (data?.tokens?.refreshToken)
+      saveToken("refreshToken", data?.tokens?.refreshToken);
+
+    return {
+      success: true,
+      message: resData.message || "Login successful!",
+      data: resData.data,
+    };
   } catch (err: any) {
     const formattedError = extractErrorMessage(
       err,
-      "Unexpected error during logout."
+      "Unexpected error during login."
     );
-    return { success: false, message: formattedError };
+
+    return { success: false, error: formattedError };
   }
 }
 
@@ -66,34 +72,35 @@ export async function callRegisterUserApi(
   email: string,
   password: string,
   name: string
-): Promise<RegisterResponse> {
+): Promise<ServerResponse<RegisterResponse>> {
   try {
-    const response = await api.post("/auth/register", {
-      email,
-      password,
-      name,
-    });
+    const response = await api.post<ServerResponse<RegisterResponse>>(
+      "/auth/register",
+      { email, password, name }
+    );
 
-    if (response.data?.success === false) {
+    const resData = response.data;
+
+    if (!resData.success) {
       const formattedError = formatApiError(
-        response.data.error,
+        resData.error,
         "Registration failed."
       );
       errorToast(formattedError);
-      return { success: false, message: formattedError };
+      return { success: false, error: formattedError };
     }
 
     const message =
-      response.data?.message ||
-      "Registration triggered, please validate your email";
+      resData.message || "Registration triggered, please validate your email";
     successToast(message);
 
-    const { data } = response.data;
+    const { data } = resData;
     saveToken("emailVerificationToken", data.verificationToken);
+
     return {
       success: true,
       message,
-      data: data,
+      data,
     };
   } catch (err: any) {
     const formattedError = extractErrorMessage(
@@ -101,47 +108,50 @@ export async function callRegisterUserApi(
       "Unexpected error during registration."
     );
     errorToast(formattedError);
-    return { success: false, message: formattedError };
+    return { success: false, error: formattedError };
   }
 }
 
 export async function callVerifyUserEmailApi(
   token: string,
   otp: string
-): Promise<RegisterResponse> {
+): Promise<ServerResponse<null>> {
   try {
-    const response = await api.post("/auth/verify-email", {
-      token,
-      otp,
-    });
+    const response = await api.post<ServerResponse<null>>(
+      "/auth/verify-email",
+      {
+        token,
+        otp,
+      }
+    );
 
-    if (response.data?.success === false) {
+    const resData = response.data;
+
+    if (!resData.success) {
       const formattedError = formatApiError(
-        response.data.error,
-        "Registration failed."
+        resData.error,
+        "Email verification failed."
       );
       errorToast(formattedError);
-      return { success: false, message: formattedError };
+      return { success: false, error: formattedError };
     }
 
-    const message =
-      response.data?.message ||
-      "Registration triggered, please validate your email";
+    const message = resData.message || "Email verified successfully!";
     successToast(message);
 
-    const { data } = response.data;
     removeToken("emailVerificationToken");
+
     return {
       success: true,
       message,
-      data: data,
+      data: null,
     };
   } catch (err: any) {
     const formattedError = extractErrorMessage(
       err,
-      "Unexpected error during registration."
+      "Unexpected error during email verification."
     );
     errorToast(formattedError);
-    return { success: false, message: formattedError };
+    return { success: false, error: formattedError };
   }
 }

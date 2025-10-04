@@ -2,36 +2,38 @@ import api from "../axios";
 import type { User } from "@/types/auth.type";
 import { formatApiError, extractErrorMessage } from "@/utils/formatter";
 import { errorToast } from "../toast";
+import type { ServerResponse } from "@/types";
 
 export async function callSearchUsersApi(
   q: string
-): Promise<{ success: boolean; data?: User[]; message?: string }> {
+): Promise<ServerResponse<User[]>> {
   try {
-    const response = await api.get("/user/search", {
+    const response = await api.get<ServerResponse<User[]>>("/user/search", {
       params: { q },
     });
 
-    if (response.data?.success === false) {
+    const resData = response.data;
+
+    if (!resData.success) {
       const formattedError = formatApiError(
-        response.data.error,
+        resData.error,
         "Failed to fetch users."
       );
       errorToast(formattedError);
-      return { success: false, message: formattedError };
+      return { success: false, error: formattedError };
     }
 
     return {
       success: true,
-      data: response.data.data,
-      message: response.data.message || "Users fetched successfully",
+      message: resData.message || "Users fetched successfully.",
+      data: resData.data,
     };
   } catch (err: unknown) {
     const formattedError = extractErrorMessage(
       err,
       "Unexpected error during user search."
     );
-
     errorToast(formattedError);
-    return { success: false, message: formattedError };
+    return { success: false, error: formattedError };
   }
 }
