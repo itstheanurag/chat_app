@@ -20,6 +20,8 @@ export async function callGetUserChatsApi(): Promise<
         resData.error,
         "Failed to retrieve chats."
       );
+
+      errorToast(formattedError);
       return { success: false, error: formattedError };
     }
 

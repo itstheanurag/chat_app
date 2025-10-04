@@ -14,6 +14,8 @@ interface ChatStore {
   setActiveChat: (chatId: string) => Promise<void>;
   sendMessage: (text: string, userId: string) => void;
   handleTyping: (username: string) => void;
+  joinChat: (chatId: string) => void;
+  leaveChat: (chatId: string) => void;
   reset: () => void;
 }
 
@@ -56,7 +58,9 @@ export const useChatStore = create<ChatStore>((set, get) => {
       set({ isLoading: true });
       try {
         const res = await callGetUserChatsApi();
-        if (res.success && Array.isArray(res.data)) {
+        console.log(res, "from chat Store fetchChats");
+
+        if (res.success && Array.isArray(res.data) && res.data?.length) {
           set({ chats: res.data });
 
           if (!get().activeChat && res.data.length > 0) {
@@ -84,11 +88,11 @@ export const useChatStore = create<ChatStore>((set, get) => {
       }
     },
 
-    /** Send a message */
     sendMessage: (text: string, userId: string) => {
       const { activeChat } = get();
       if (!activeChat) return;
 
+      console.log("Sending sending messages");
       socket?.emit("sendMessage", {
         chatId: activeChat._id,
         text,
@@ -115,6 +119,14 @@ export const useChatStore = create<ChatStore>((set, get) => {
         typingUsers: [],
         isLoading: false,
       });
+    },
+
+    joinChat: (chatId: string) => {
+      socket?.emit("joinChat", chatId);
+    },
+
+    leaveChat: (chatId: string) => {
+      socket?.emit("leaveChat", chatId);
     },
   };
 });

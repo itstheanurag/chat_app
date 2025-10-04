@@ -5,7 +5,7 @@ import Modal from "./Modal";
 import { useAuthStore, useChatStore } from "@/stores";
 
 interface ChatSidebarProps {
-  selectedChatId?: string;
+  selectedChatId?: string | null;
   onSelectChat: (chatId: string) => void;
 }
 
@@ -16,6 +16,7 @@ export const ChatSidebar: React.FC<ChatSidebarProps> = ({
   const { user, logout } = useAuthStore();
   const { chats, fetchChats, isLoading } = useChatStore();
   const [menuOpen, setMenuOpen] = useState(false);
+
   useEffect(() => {
     (async () => {
       await fetchChats();
@@ -23,41 +24,39 @@ export const ChatSidebar: React.FC<ChatSidebarProps> = ({
   }, [user, fetchChats]);
 
   return (
-    <div className="w-100 bg-white border-r-4 border-neutral-900 flex flex-col h-full overflow-x-hidden">
+    <div className="w-100 bg-white border-r-4 border-neutral-900 flex flex-col h-full">
       <Modal onChatCreated={fetchChats} />
 
-      {/* Chat list */}
-      <div className="flex-1 overflow-y-auto">
-        <div className="p-4">
-          {isLoading ? (
-            <p className="text-center text-neutral-500">Loading chats...</p>
-          ) : chats.length > 0 ? (
-            <div className="space-y-2">
-              {chats.map((chat) => (
-                <ChatItem
-                  key={chat._id}
-                  chat={chat}
-                  isSelected={selectedChatId === chat._id}
-                  onClick={() => onSelectChat(chat._id)}
-                />
-              ))}
-            </div>
-          ) : (
-            <div className="text-center py-12">
-              <MessageCircle className="h-12 w-12 text-neutral-300 mx-auto mb-4" />
-              <p className="text-neutral-600 font-medium">
-                No conversations found
-              </p>
-              <p className="text-neutral-400 text-sm mt-2">
-                Start a new chat to begin messaging
-              </p>
-            </div>
-          )}
-        </div>
+      {/* Chat list + empty state */}
+      <div className="flex-1 overflow-y-auto p-4">
+        {isLoading ? (
+          <p className="text-center text-neutral-500">Loading chats...</p>
+        ) : chats.length > 0 ? (
+          <div className="space-y-2">
+            {chats.map((chat) => (
+              <ChatItem
+                key={chat._id}
+                chat={chat}
+                isSelected={selectedChatId === chat._id}
+                onClick={() => onSelectChat(chat._id)}
+              />
+            ))}
+          </div>
+        ) : (
+          <div className="text-center py-12">
+            <MessageCircle className="h-12 w-12 text-neutral-300 mx-auto mb-4" />
+            <p className="text-neutral-600 font-medium">
+              No conversations found
+            </p>
+            <p className="text-neutral-400 text-sm mt-2">
+              Start a new chat to begin messaging
+            </p>
+          </div>
+        )}
       </div>
 
-      {/* User profile */}
-      <div className="relative border-t-4 border-neutral-900 bg-white p-4">
+      {/* User profile footer */}
+      <div className="border-t-4 border-neutral-900 bg-white p-4 flex-shrink-0 relative">
         <div
           className="flex items-center gap-3 cursor-pointer"
           onClick={() => setMenuOpen((prev) => !prev)}
