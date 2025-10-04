@@ -1,7 +1,7 @@
 import { create } from "zustand";
 import type { AuthState, User } from "@/types";
-import { toast } from "react-toastify";
 import { getToken, getUser, removeUser, saveUser } from "@/lib/storage";
+
 import {
   callLoginUserApi,
   callLogoutUserApi,
@@ -42,7 +42,7 @@ export const useAuthStore = create<AuthStore>((set) => ({
       const result = await callLoginUserApi(email, password);
 
       if (!result.success) {
-        toast.error(result.message || "Login failed");
+        errorToast(result.error ?? "Login failed");
         set({ isLoading: false });
         return null;
       }

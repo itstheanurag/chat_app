@@ -1,7 +1,11 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { formatApiError, extractErrorMessage } from "@/utils/formatter";
-import type { LoginResult, RegisterResponse } from "@/types/auth.type";
+import type {
+  ErrorResponse,
+  LoginResult,
+  RegisterResponse,
+} from "@/types/auth.type";
 import { flushLocalTokens, removeToken, saveToken } from "../storage";
 import { errorToast, successToast } from "../toast";
 import api from "../axios";
@@ -9,15 +13,14 @@ import api from "../axios";
 export async function callLoginUserApi(
   email: string,
   password: string
-): Promise<LoginResult> {
+): Promise<LoginResult | ErrorResponse> {
   try {
     const response = await api.post("/auth/login", { email, password });
 
-    if (response.data?.success === false) {
-      const formattedError = formatApiError(
-        response.data.error,
-        "Logout failed."
-      );
+    console.log("response", response);
+
+    if (!response.success) {
+      const formattedError = formatApiError(response.error, "Logout failed.");
       return { success: false, message: formattedError };
     }
 
