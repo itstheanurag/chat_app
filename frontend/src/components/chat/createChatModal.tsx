@@ -38,7 +38,12 @@ export const ChatModal: React.FC<ChatModalProps> = ({
       setLoading(true);
       try {
         const res = await callSearchUsersApi(query.trim());
-        setResults(res?.data || []);
+        if (res.success) {
+          setResults(res.data);
+        } else {
+          setResults([]);
+          toast.error(res.error);
+        }
       } catch (err) {
         toast.error((err as any)?.message || "failed to search users");
       } finally {

@@ -33,34 +33,44 @@ export const messageSchema = z.object({
   ),
 });
 
-export const chatSchema = z.object({
-  type: z.enum(["direct", "group"]),
-  name: z.string().trim(),
-  avatar: z.url().optional(),
-  participants: z
-    .array(
-      z.object({
-        userId: objectIdSchema,
-        joinedAt: z.preprocess(
+export const chatSchema = z
+  .object({
+    type: z.enum(["direct", "group"]),
+    name: z.string().optional(),
+    avatar: z.string().url().optional(),
+    participants: z
+      .array(
+        z.object({
+          userId: objectIdSchema,
+          joinedAt: z.preprocess(
+            (val) => (val ? new Date(val as string) : new Date()),
+            z.date()
+          ),
+        })
+      )
+      .min(1, "A chat must have at least one participant"),
+    lastMessage: z
+      .object({
+        text: z.string(),
+        senderId: objectIdSchema,
+        createdAt: z.preprocess(
           (val) => (val ? new Date(val as string) : new Date()),
           z.date()
         ),
       })
-    )
-    .min(1, "A chat must have at least one participant"),
-  lastMessage: z
-    .object({
-      text: z.string(),
-      senderId: objectIdSchema,
-      createdAt: z.preprocess(
-        (val) => (val ? new Date(val as string) : new Date()),
-        z.date()
-      ),
-    })
-    .optional(),
-  isArchived: z.boolean().optional(),
-  isDeleted: z.boolean().optional(),
-});
+      .optional(),
+    isArchived: z.boolean().optional(),
+    isDeleted: z.boolean().optional(),
+  })
+  .superRefine((data, ctx) => {
+    if (data.type === "direct" && !data.name?.trim()) {
+      ctx.addIssue({
+        path: ["name"],
+        message: "Name is required for direct chats",
+        code: "custom",
+      });
+    }
+  });
 
 export const modifyParticipantsSchema = z.object({
   userIds: z.array(z.string()).nonempty("At least one user ID is required"),

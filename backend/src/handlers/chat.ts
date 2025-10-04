@@ -22,6 +22,7 @@ export const createChat = async (
     }
 
     const parsedData = parsedResult.data;
+
     const { type, participants, name, avatar, lastMessage } = parsedData;
 
     const allParticipants = [

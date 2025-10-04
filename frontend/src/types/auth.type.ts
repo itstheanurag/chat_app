@@ -9,15 +9,15 @@ export interface LoginResult {
   };
 }
 
-  export interface RegisterResponse {
-    verificationToken: string;
-  }
+export interface RegisterResponse {
+  verificationToken: string;
+}
 
 export interface User {
   id: string;
   email: string;
   name: string;
-  isEmailVerified: boolean;
+  isEmailVerified?: boolean;
   avatar?: string;
   isOnline?: boolean;
   lastSeen?: Date;
