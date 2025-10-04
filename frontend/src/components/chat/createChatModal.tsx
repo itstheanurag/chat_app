@@ -29,7 +29,6 @@ export const ChatModal: React.FC<ChatModalProps> = ({
   const [loading, setLoading] = useState(false);
   const [creating, setCreating] = useState(false);
 
-  // 🔍 Debounced search
   useEffect(() => {
     if (!query.trim()) {
       setResults([]);
@@ -41,8 +40,6 @@ export const ChatModal: React.FC<ChatModalProps> = ({
         const res = await callSearchUsersApi(query.trim());
         setResults(res?.data || []);
       } catch (err) {
-        // console.error(err);
-        // alert("Failed to fetch users");
         toast.error((err as any)?.message || "failed to search users");
       } finally {
         setLoading(false);

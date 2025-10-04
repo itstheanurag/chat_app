@@ -22,7 +22,6 @@ export const register = async (
     const parsedResult = registerSchema.safeParse(req.body);
 
     if (!parsedResult.success) {
-      // Validation failed
       return sendError(res, 400, parsedResult.error);
     }
 
@@ -40,7 +39,6 @@ export const register = async (
 
     const emailSecret: jwt.Secret = process.env.JWT_EMAIL_SECRET!;
     const emailExpiresIn = process.env.JWT_EMAIL_EXPIRES_IN! as unknown as any;
-
     const verificationToken = jwt.sign(
       { userId: user._id, email: user.email },
       emailSecret,
@@ -55,7 +53,7 @@ export const register = async (
       otp
     );
 
-    // console.log(`OTP for ${user.email}: ${otp}`);
+    console.log(`OTP for ${user.email}: ${otp}`);
 
     return sendResponse(
       res,
@@ -268,12 +266,9 @@ export const verifyEmail = async (
     const decoded = jwt.verify(
       token,
       process.env.JWT_EMAIL_SECRET! as string
-    ) as {
-      userId: string;
-    };
+    ) as any;
 
     const userId = decoded.userId;
-
     const storedOtp = await redisClient.get(
       `${REDIS_KEYS.emailVerificationKey}:${userId}`
     );

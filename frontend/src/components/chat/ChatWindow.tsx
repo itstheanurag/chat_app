@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import type { Message } from "@/types";
 import { MessageBubble } from "./MessageBubble";
-import { findChatById } from "@/lib/apis/chat";
+import { callFindChatByIdApi } from "@/lib/apis/chat";
 import { Send } from "lucide-react";
 import { getSocket } from "@/lib/socket";
 import ChatHeader from "./ChatHeader";
@@ -23,8 +23,6 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ chatId }) => {
   const typingTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const socket = getSocket();
-
-  /** Scroll to bottom when messages change */
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
@@ -34,7 +32,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ chatId }) => {
     let isMounted = true;
     const fetchChats = async () => {
       try {
-        const res = await findChatById(chatId);
+        const res = await callFindChatByIdApi(chatId);
         if (isMounted && res.success && res.data?.chat) {
           setChat(res.data.chat);
           setMessages(res.data.messages || []);
