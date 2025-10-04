@@ -1,24 +1,19 @@
 import type { Message } from "./message.type";
 
-export interface GetUserChatsResult {
-  success: boolean;
-  message: string;
-  data?: BaseChat[];
-}
-
-export interface CreateDirectChatResult {
-  success: boolean;
-  message: string;
-  data?: BaseChat;
-}
-
 export interface ChatUser {
   _id: string;
   name: string;
   email: string;
 }
 
-// Base type (unpopulated IDs)
+export interface GetUserChatsResult {
+  data: BaseChat[];
+}
+
+export interface CreateDirectChatResult {
+  data: BaseChat;
+}
+
 export interface BaseParticipant {
   _id: string;
   userId: ChatUser;
@@ -46,14 +41,6 @@ export interface BaseChat {
   __v: number;
 }
 
-// Populated user type
-export interface ChatUser {
-  _id: string;
-  name: string;
-  email: string;
-}
-
-// Populated version
 export interface ChatParticipantPopulated {
   _id: string;
   userId: ChatUser;
@@ -69,7 +56,6 @@ export interface ChatPopulated
 export type ChatList = ChatPopulated[];
 
 export interface FindChatByIdResult {
-  success: boolean;
-  message: string;
-  data?: { chat: BaseChat; messages: Message[] };
+  chat: BaseChat;
+  messages: Message[];
 }

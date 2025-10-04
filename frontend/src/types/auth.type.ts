@@ -1,27 +1,17 @@
-export type ServerErrorResponse = {
-  success: false;
-  error: string | Record<string, string[]>;
-  details?: unknown;
-};
-
 export interface LoginResult {
-  success: boolean;
-  message: string;
-  data?: {
-    id: string;
-    email: string;
-    name: string;
-    isEmailVerified: boolean;
+  id: string;
+  email: string;
+  name: string;
+  isEmailVerified: boolean;
+  tokens: {
+    accessToken: string;
+    refreshToken: string;
   };
 }
 
-export interface RegisterResponse {
-  success: boolean;
-  message: string;
-  data?: {
+  export interface RegisterResponse {
     verificationToken: string;
-  };
-}
+  }
 
 export interface User {
   id: string;
@@ -37,9 +27,4 @@ export interface AuthState {
   user: User | null;
   isAuthenticated: boolean;
   isLoading: boolean;
-}
-
-export interface ErrorResponse {
-  success: boolean;
-  error: string;
 }
