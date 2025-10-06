@@ -43,10 +43,6 @@ api.interceptors.response.use(
       });
     }
 
-    if (error.response.data) {
-      return Promise.resolve(error.response);
-    }
-
     if (error.response.status >= 500) {
       errorToast("Server error. Please try again later.");
       return Promise.resolve(error);
@@ -98,16 +94,19 @@ api.interceptors.response.use(
           },
         });
       } catch (refreshError) {
-        // Reject all queued requests
         failedQueue.forEach((req) => req.reject(refreshError));
         failedQueue = [];
-
         flushLocalTokens();
         window.location.href = "/login";
         return Promise.reject(refreshError);
       } finally {
         isRefreshing = false;
       }
+    }
+
+    if (error.response.data) {
+      console.log("DOIGN EARLY RETURN");
+      return Promise.resolve(error.response);
     }
   }
 );

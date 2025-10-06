@@ -1,41 +1,37 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import { MessageSquare } from "lucide-react";
 import { ChatSidebar } from "../chat/ChatSideBar";
 import { ChatWindow } from "../chat/ChatWindow";
-import { connectSocket } from "@/lib/socket";
-import { getToken } from "@/lib/storage";
 import { useChatStore } from "@/stores/chat.store";
 
 export const ChatLayout: React.FC = () => {
-  const [isConnected, setIsConnected] = useState(false);
-
-  const { activeChat, setActiveChat } = useChatStore();
-  const token = getToken("accessToken");
+  const { chats, fetchChats, activeChat, setActiveChat } = useChatStore();
 
   useEffect(() => {
-    if (!token) return;
-    const socket = connectSocket(token);
+    let isMounted = true;
 
-    socket.on("connect", () => setIsConnected(true));
-    socket.on("disconnect", () => setIsConnected(false));
+    const fetch = async () => {
+      if (!isMounted) return;
+      await fetchChats();
+    };
+
+    fetch();
 
     return () => {
-      socket.disconnect();
-      setIsConnected(false);
+      isMounted = false;
     };
-  }, [token]);
+  }, []);
 
   return (
     <div className="h-screen bg-sage-50 flex">
-      {/* Sidebar handles chat selection */}
       <ChatSidebar
-        selectedChatId={activeChat?._id || null}
+        chats={chats}
+        selectedChatId={activeChat || null}
         onSelectChat={setActiveChat}
       />
 
-      {/* Main window */}
       {activeChat ? (
-        <ChatWindow chatId={activeChat._id} />
+        <ChatWindow />
       ) : (
         <div className="flex-1 flex items-center justify-center bg-white border-r-4 border-slate-900">
           <div className="text-center">

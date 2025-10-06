@@ -3,10 +3,7 @@ import React, { useState } from "react";
 import Button from "../ui/Button";
 import { ChatModal } from "./createChatModal";
 
-interface ChatModalProps {
-  onChatCreated: () => void; // ✅ Added callback
-}
-const Modal: React.FC<ChatModalProps> = ({ onChatCreated }) => {
+const Modal: React.FC = () => {
   const [modalOpen, setModalOpen] = useState(false);
   const [modalType, setModalType] = useState<"direct" | "group">("direct");
 
@@ -39,7 +36,6 @@ const Modal: React.FC<ChatModalProps> = ({ onChatCreated }) => {
           isOpen={modalOpen}
           onClose={() => setModalOpen(false)}
           type={modalType}
-          onChatCreated={onChatCreated}
         />
       </div>
     </div>

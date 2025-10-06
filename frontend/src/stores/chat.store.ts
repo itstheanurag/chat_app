@@ -5,7 +5,7 @@ import { callFindChatByIdApi, callGetUserChatsApi, getSocket } from "@/lib";
 
 interface ChatStore {
   chats: BaseChat[];
-  activeChat: BaseChat | null;
+  activeChat: string | null;
   messages: Message[];
   typingUsers: string[];
   isLoading: boolean;
@@ -25,7 +25,7 @@ export const useChatStore = create<ChatStore>((set, get) => {
   if (socket && !socket.hasListeners) {
     socket.on("receiveMessage", (msg: Message) => {
       const { activeChat } = get();
-      if (msg.chatId === activeChat?._id) {
+      if (msg.chatId === activeChat) {
         set((state) => ({ messages: [...state.messages, msg] }));
       }
     });
@@ -64,7 +64,7 @@ export const useChatStore = create<ChatStore>((set, get) => {
           set({ chats: res.data });
 
           if (!get().activeChat && res.data.length > 0) {
-            await get().setActiveChat(res.data[0]._id);
+            get().setActiveChat(res.data[0]._id);
           }
         }
       } finally {
@@ -79,7 +79,7 @@ export const useChatStore = create<ChatStore>((set, get) => {
         if (res.success && res.data?.chat) {
           socket?.emit("joinChat", chatId);
           set({
-            activeChat: res.data.chat,
+            activeChat: res.data.chat._id,
             messages: res.data.messages || [],
           });
         }
@@ -94,7 +94,7 @@ export const useChatStore = create<ChatStore>((set, get) => {
 
       console.log("Sending sending messages");
       socket?.emit("sendMessage", {
-        chatId: activeChat._id,
+        chatId: activeChat,
         text,
         senderId: userId,
       });
@@ -104,10 +104,10 @@ export const useChatStore = create<ChatStore>((set, get) => {
       const { activeChat } = get();
       if (!activeChat) return;
 
-      socket?.emit("typing", { chatId: activeChat._id, username });
+      socket?.emit("typing", { chatId: activeChat, username });
 
       setTimeout(() => {
-        socket?.emit("stopTyping", { chatId: activeChat._id, username });
+        socket?.emit("stopTyping", { chatId: activeChat, username });
       }, 2000);
     },
 

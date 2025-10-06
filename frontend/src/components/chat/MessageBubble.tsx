@@ -40,20 +40,6 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({
             >
               {formatTime(message.createdAt)}
             </span>
-
-            {isOwn && showSeen && (
-              <div
-                className={`ml-2 ${
-                  !message.readAt ? "text-blue-200" : "text-blue-400"
-                }`}
-              >
-                {/* {message.seenBy.length === 0 && <Check className="h-3 w-3" />}
-                {message.seenBy.length === 1 && <Check className="h-3 w-3" />}
-                {message.seenBy.length > 1 && (
-                  <CheckCheck className="h-3 w-3" />
-                )} */}
-              </div>
-            )}
           </div>
         </div>
       </div>

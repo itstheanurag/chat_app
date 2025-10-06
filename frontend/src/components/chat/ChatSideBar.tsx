@@ -1,10 +1,12 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { MessageCircle } from "lucide-react";
 import { ChatItem } from "./ChatItem";
 import Modal from "./Modal";
 import { useAuthStore, useChatStore } from "@/stores";
+import type { BaseChat } from "@/types";
 
 interface ChatSidebarProps {
+  chats: BaseChat[];
   selectedChatId?: string | null;
   onSelectChat: (chatId: string) => void;
 }
@@ -14,20 +16,13 @@ export const ChatSidebar: React.FC<ChatSidebarProps> = ({
   onSelectChat,
 }) => {
   const { user, logout } = useAuthStore();
-  const { chats, fetchChats, isLoading } = useChatStore();
+  const { chats, isLoading } = useChatStore();
   const [menuOpen, setMenuOpen] = useState(false);
-
-  useEffect(() => {
-    (async () => {
-      await fetchChats();
-    })();
-  }, [user, fetchChats]);
 
   return (
     <div className="w-100 bg-white border-r-4 border-neutral-900 flex flex-col h-full">
-      <Modal onChatCreated={fetchChats} />
+      <Modal />
 
-      {/* Chat list + empty state */}
       <div className="flex-1 overflow-y-auto p-4">
         {isLoading ? (
           <p className="text-center text-neutral-500">Loading chats...</p>

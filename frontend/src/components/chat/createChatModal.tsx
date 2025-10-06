@@ -8,20 +8,20 @@ import {
   callCreateGroupChatApi,
   callSearchUsersApi,
 } from "@/lib";
+import { useChatStore } from "@/stores";
 
 interface ChatModalProps {
   isOpen: boolean;
   onClose: () => void;
   type: "direct" | "group";
-  onChatCreated: () => void;
 }
 
 export const ChatModal: React.FC<ChatModalProps> = ({
   isOpen,
   onClose,
   type,
-  onChatCreated,
 }) => {
+  const { fetchChats } = useChatStore();
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<User[]>([]);
   const [selectedUsers, setSelectedUsers] = useState<User[]>([]);
@@ -34,6 +34,7 @@ export const ChatModal: React.FC<ChatModalProps> = ({
       setResults([]);
       return;
     }
+    
     const timer = setTimeout(async () => {
       setLoading(true);
       try {
@@ -85,7 +86,7 @@ export const ChatModal: React.FC<ChatModalProps> = ({
         const ids = selectedUsers.map((u) => u.id);
         await callCreateGroupChatApi(ids, groupName);
       }
-      onChatCreated();
+      fetchChats();
       resetState();
       onClose();
     } catch (err) {

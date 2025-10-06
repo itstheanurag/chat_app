@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
-import type { Message } from "@/types";
+import type { BaseChat, Message } from "@/types";
 import { MessageBubble } from "./MessageBubble";
 import { callFindChatByIdApi } from "@/lib/apis/chat";
 import { Send } from "lucide-react";
@@ -7,16 +7,14 @@ import { getSocket } from "@/lib/socket";
 import ChatHeader from "./ChatHeader";
 import { toast } from "react-toastify";
 import { useAuthStore } from "@/stores/user.store";
+import { useChatStore } from "@/stores";
 
-interface ChatWindowProps {
-  chatId: string;
-}
-
-export const ChatWindow: React.FC<ChatWindowProps> = ({ chatId }) => {
+export const ChatWindow: React.FC = () => {
   const { user } = useAuthStore();
+  const { activeChat, handleTyping } = useChatStore();
   const [messageInput, setMessageInput] = useState("");
   const [messages, setMessages] = useState<Message[]>([]);
-  const [chat, setChat] = useState<any>(null);
+  const [chat, setChat] = useState<BaseChat | null>(null);
   const [typingUsers, setTypingUsers] = useState<string[]>([]);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [isTyping, setIsTyping] = useState(false);
@@ -24,38 +22,45 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ chatId }) => {
   const typingTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const socket = getSocket();
+
+  const fetchedChatRef = useRef<string | null>(null);
+
+  useEffect(() => {
+    if (!activeChat || activeChat.length !== 24) return;
+    if (fetchedChatRef.current === activeChat) return;
+    let isMounted = true;
+
+    const fetchChats = async () => {
+      try {
+        const res = await callFindChatByIdApi(activeChat);
+        if (isMounted && res.success && res.data?.chat) {
+          setChat(res.data.chat);
+          setMessages(res.data.messages || []);
+          fetchedChatRef.current = activeChat;
+        }
+      } catch (err) {
+        toast.error((err as any)?.message || "Failed to load chats");
+      }
+    };
+
+    fetchChats();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [activeChat]);
+
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
   useEffect(() => {
-    let isMounted = true;
-    const fetchChats = async () => {
-      try {
-        const res = await callFindChatByIdApi(chatId);
-        if (isMounted && res.success && res.data?.chat) {
-          setChat(res.data.chat);
-          setMessages(res.data.messages || []);
-        }
-      } catch (err) {
-        // console.error("Failed to fetch chat:", err);
-        toast.error((err as any)?.message || "Failed to load chats");
-      }
-    };
-    if (chatId?.length === 24) fetchChats();
-    return () => {
-      isMounted = false;
-    };
-  }, [chatId]);
+    if (!socket || !activeChat) return;
 
-  /** Join/leave chat room and listen for messages + typing events */
-  useEffect(() => {
-    if (!socket || !chatId) return;
-
-    socket.emit("joinChat", chatId);
+    socket.emit("joinChat", activeChat);
 
     const handleNewMessage = (msg: Message) => {
-      if (msg.chatId === chatId) setMessages((prev) => [...prev, msg]);
+      if (msg.chatId === activeChat) setMessages((prev) => [...prev, msg]);
     };
 
     const handleUserTyping = ({ username }: { username: string }) => {
@@ -74,41 +79,28 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ chatId }) => {
     socket.on("stopTyping", handleStopTyping);
 
     return () => {
-      socket.emit("leaveChat", chatId);
+      socket.emit("leaveChat", activeChat);
       socket.off("receiveMessage", handleNewMessage);
       socket.off("userTyping", handleUserTyping);
       socket.off("stopTyping", handleStopTyping);
     };
-  }, [chatId, socket, user?.name]);
-
-  /** Send typing signals */
-  const handleTyping = () => {
-    if (!socket || !chatId || !user) return;
-
-    if (!isTyping) {
-      socket.emit("typing", { chatId, username: user.name });
-      setIsTyping(true);
-    }
-
-    if (typingTimeout.current) clearTimeout(typingTimeout.current);
-
-    typingTimeout.current = setTimeout(() => {
-      socket.emit("stopTyping", { chatId, username: user.name });
-      setIsTyping(false);
-    }, 2000);
-  };
+  }, [socket]);
 
   /** Send message */
   const handleSendMessage = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!socket || !chatId || !user) return;
+    if (!socket || !activeChat || !user) return;
 
     const content = messageInput.trim();
     if (!content) return;
 
-    socket.emit("sendMessage", { chatId, text: content, senderId: user.id });
+    socket.emit("sendMessage", {
+      activeChat,
+      text: content,
+      senderId: user.id,
+    });
     setMessageInput("");
-    socket.emit("stopTyping", { chatId, username: user.name });
+    socket.emit("stopTyping", { activeChat, username: user.name });
     setIsTyping(false);
   };
 
@@ -144,7 +136,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ chatId }) => {
           value={messageInput}
           onChange={(e) => {
             setMessageInput(e.target.value);
-            handleTyping();
+            handleTyping(user!.name);
           }}
           placeholder="Type your message..."
           className="flex-1 resize-none border p-3 rounded"
