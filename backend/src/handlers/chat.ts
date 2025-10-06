@@ -82,7 +82,7 @@ export const listUserChats = async (
       isArchived: { $ne: true },
       $or: [{ "participants.userId": userId }, { admins: userId }],
     })
-      .sort({ "lastMessage.createdAt": -1, updatedAt: -1 })
+      .sort({ createdAt: -1, "lastMessage.createdAt": -1 })
       .populate("participants.userId", "name email")
       .populate("admins", "name email");
 

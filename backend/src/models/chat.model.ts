@@ -45,7 +45,6 @@ const ChatSchema = new Schema<IChat>(
   { timestamps: true }
 );
 
-// For faster lookups
 ChatSchema.index({ "participants.userId": 1 });
 ChatSchema.index({ admins: 1 });
 

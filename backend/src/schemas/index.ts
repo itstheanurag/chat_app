@@ -37,7 +37,7 @@ export const chatSchema = z
   .object({
     type: z.enum(["direct", "group"]),
     name: z.string().optional(),
-    avatar: z.string().url().optional(),
+    avatar: z.string().optional(),
     participants: z
       .array(
         z.object({
@@ -63,7 +63,7 @@ export const chatSchema = z
     isDeleted: z.boolean().optional(),
   })
   .superRefine((data, ctx) => {
-    if (data.type === "direct" && !data.name?.trim()) {
+    if (data.type === "group" && !data.name?.trim()) {
       ctx.addIssue({
         path: ["name"],
         message: "Name is required for direct chats",
