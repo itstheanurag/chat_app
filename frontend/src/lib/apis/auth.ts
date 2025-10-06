@@ -19,6 +19,7 @@ export async function callLoginUserApi(
 
     const resData = response.data;
 
+    console.log(resData)
     if (!resData.success) {
       return { success: false, error: resData.error };
     }

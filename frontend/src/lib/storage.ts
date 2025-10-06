@@ -42,8 +42,9 @@ export const saveUser = (user: User) => {
   localStorage.setItem("user", JSON.stringify(user));
 };
 
-export const getUser = () => {
-  return localStorage.getItem("user");
+export const getUser = (): User | null  => {
+  const stored = localStorage.getItem("user");
+  return stored ? (JSON.parse(stored) as User) : null;
 };
 
 export const removeUser = () => {

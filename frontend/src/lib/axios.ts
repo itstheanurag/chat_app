@@ -36,16 +36,20 @@ api.interceptors.response.use(
     const originalRequest: any = error.config;
 
     if (!error.response) {
-      console.error("Network or CORS error:", error.message);
-      errorToast(
-        "Network error or server is unreachable. Please check your connection."
-      );
-      return Promise.reject(error);
+      errorToast("Network error or server is unreachable.");
+      return Promise.reject({
+        success: false,
+        error: "Network error or server is unreachable.",
+      });
+    }
+
+    if (error.response.data) {
+      return Promise.resolve(error.response);
     }
 
     if (error.response.status >= 500) {
       errorToast("Server error. Please try again later.");
-      return Promise.reject(error);
+      return Promise.resolve(error);
     }
 
     if (originalRequest.url?.includes("/auth/refresh")) {

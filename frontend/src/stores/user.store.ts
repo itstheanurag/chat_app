@@ -26,10 +26,9 @@ export const useAuthStore = create<AuthStore>((set) => ({
 
   initialize: () => {
     const token = getToken("accessToken");
-    const storedUser = getUser();
+    const user = getUser();
 
-    if (token && storedUser) {
-      const user: User = JSON.parse(storedUser);
+    if (token && user) {
       set({ user, isAuthenticated: true, isLoading: false });
     } else {
       set({ user: null, isAuthenticated: false, isLoading: false });

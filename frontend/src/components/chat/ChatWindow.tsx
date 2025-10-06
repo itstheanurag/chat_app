@@ -20,6 +20,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ chatId }) => {
   const [typingUsers, setTypingUsers] = useState<string[]>([]);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [isTyping, setIsTyping] = useState(false);
+
   const typingTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const socket = getSocket();
@@ -27,7 +28,6 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ chatId }) => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  /** Fetch chat details + history */
   useEffect(() => {
     let isMounted = true;
     const fetchChats = async () => {

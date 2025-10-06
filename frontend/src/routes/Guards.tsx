@@ -10,7 +10,8 @@ export const VerifyEmailRoute: React.FC<{ children: React.ReactNode }> = ({
   const { user } = useAuthStore();
   const token = getToken("emailVerificationToken");
 
-  if (!user && !token) return <Navigate to="/login" replace />;
+  if (!user) return <Navigate to="/login" replace />;
+  if (user && token) <Navigate to="/verify-email" replace />;
   if (user?.isEmailVerified) return <Navigate to="/chat" replace />;
   return <>{children}</>;
 };

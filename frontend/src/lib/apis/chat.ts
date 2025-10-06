@@ -60,6 +60,7 @@ export async function callCreateDirectChatApi(
         resData.error,
         "Failed to create direct chat."
       );
+      
       errorToast(formattedError);
       return { success: false, error: formattedError };
     }
