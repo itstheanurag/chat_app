@@ -6,10 +6,6 @@ export function registerChatEvents(io: Server) {
   io.on("connection", (socket: AuthenticatedSocket) => {
     if (!socket.user) return;
 
-    // console.log(`User connected: ${socket.user.name} (${socket.user.id})`);
-    /**
-     * Join a chat room
-     */
     socket.on("joinChat", async (chatId: string) => {
       try {
         const chat = await Chat.findById(chatId);
@@ -21,7 +17,6 @@ export function registerChatEvents(io: Server) {
 
         if (!isParticipant) return socket.emit("error", "Access denied");
         socket.join(chatId);
-        // console.log(`${socket?.user?.name} joined chat ${chatId}`);
         const messages = await Message.find({ chatId })
           .sort({ createdAt: -1 })
           .limit(20)
@@ -42,14 +37,12 @@ export function registerChatEvents(io: Server) {
       async (data: { chatId: string; text: string; senderId: string }) => {
         try {
           const { chatId, text, senderId } = data;
-          if (!text.trim()) return;
 
-          // console.log(data);
+          if (!text.trim()) return;
 
           const chat = await Chat.findById(chatId);
           if (!chat) return socket.emit("error", "Chat not found");
 
-          // Validate participant
           const isParticipant = chat.participants.some(
             (p) => p.userId.toString() === socket.user!.id
           );
@@ -81,7 +74,7 @@ export function registerChatEvents(io: Server) {
     socket.on("typing", async (data: { chatId: string; username: string }) => {
       try {
         const { chatId, username } = data;
-        io.to(chatId).emit("userTyping", { username });
+        io.to(chatId).emit("userTyping", { userId: socket.user!.id, username });
       } catch (err) {
         // console.error(err);
         socket.emit("error", "Failed to send message");
@@ -93,7 +86,10 @@ export function registerChatEvents(io: Server) {
       async (data: { chatId: string; username: string }) => {
         try {
           const { chatId, username } = data;
-          io.to(chatId).emit("stopTyping", { username });
+          io.to(chatId).emit("stopTyping", {
+            userId: socket.user!.id,
+            username,
+          });
         } catch (err) {
           // console.error(err);
           socket.emit("error", "Failed to send message");
