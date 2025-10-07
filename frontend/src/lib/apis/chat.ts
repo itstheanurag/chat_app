@@ -60,7 +60,7 @@ export async function callCreateDirectChatApi(
         resData.error,
         "Failed to create direct chat."
       );
-      
+
       errorToast(formattedError);
       return { success: false, error: formattedError };
     }
@@ -88,7 +88,7 @@ export async function callCreateDirectChatApi(
  */
 export async function callCreateGroupChatApi(
   participantIds: string[],
-  name: string
+  name?: string
 ): Promise<ServerResponse<BaseChat>> {
   try {
     const response = await api.post<ServerResponse<BaseChat>>("/chats", {
