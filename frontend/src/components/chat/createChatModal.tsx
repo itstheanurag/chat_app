@@ -3,11 +3,7 @@ import Button from "../ui/Button";
 import { Search } from "lucide-react";
 import type { User } from "@/types/auth.type";
 import { toast } from "react-toastify";
-import {
-  callCreateDirectChatApi,
-  callCreateGroupChatApi,
-  callSearchUsersApi,
-} from "@/lib";
+import { callSearchUsersApi } from "@/lib";
 import { useChatStore } from "@/stores";
 
 interface ChatModalProps {
@@ -21,7 +17,7 @@ export const ChatModal: React.FC<ChatModalProps> = ({
   onClose,
   type,
 }) => {
-  const { fetchChats } = useChatStore();
+  const { fetchChats, createChat } = useChatStore();
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<User[]>([]);
   const [selectedUsers, setSelectedUsers] = useState<User[]>([]);
@@ -34,7 +30,7 @@ export const ChatModal: React.FC<ChatModalProps> = ({
       setResults([]);
       return;
     }
-    
+
     const timer = setTimeout(async () => {
       setLoading(true);
       try {
@@ -77,16 +73,16 @@ export const ChatModal: React.FC<ChatModalProps> = ({
     try {
       if (type === "direct") {
         const participant = selectedUsers[0];
-        await callCreateDirectChatApi(participant.id);
+        await createChat("direct", [participant.id]);
       } else {
         if (!groupName.trim()) {
           setCreating(false);
           return alert("Please enter a group name");
         }
         const ids = selectedUsers.map((u) => u.id);
-        await callCreateGroupChatApi(ids, groupName);
+        await createChat("group", ids, groupName);
       }
-      fetchChats();
+      await fetchChats();
       resetState();
       onClose();
     } catch (err) {

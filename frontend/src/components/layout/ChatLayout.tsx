@@ -1,34 +1,14 @@
-import React, { useEffect } from "react";
+import React from "react";
 import { MessageSquare } from "lucide-react";
 import { ChatSidebar } from "../chat/ChatSideBar";
 import { ChatWindow } from "../chat/ChatWindow";
 import { useChatStore } from "@/stores/chat.store";
 
 export const ChatLayout: React.FC = () => {
-  const { chats, fetchChats, activeChat, setActiveChat } = useChatStore();
-
-  useEffect(() => {
-    let isMounted = true;
-
-    const fetch = async () => {
-      if (!isMounted) return;
-      await fetchChats();
-    };
-
-    fetch();
-
-    return () => {
-      isMounted = false;
-    };
-  }, []);
-
+  const { activeChat } = useChatStore();
   return (
     <div className="h-screen bg-sage-50 flex">
-      <ChatSidebar
-        chats={chats}
-        selectedChatId={activeChat || null}
-        onSelectChat={setActiveChat}
-      />
+      <ChatSidebar />
 
       {activeChat ? (
         <ChatWindow />

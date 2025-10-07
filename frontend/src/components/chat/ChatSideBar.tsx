@@ -1,23 +1,22 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { MessageCircle } from "lucide-react";
 import { ChatItem } from "./ChatItem";
 import Modal from "./Modal";
 import { useAuthStore, useChatStore } from "@/stores";
-import type { BaseChat } from "@/types";
 
-interface ChatSidebarProps {
-  chats: BaseChat[];
-  selectedChatId?: string | null;
-  onSelectChat: (chatId: string) => void;
-}
-
-export const ChatSidebar: React.FC<ChatSidebarProps> = ({
-  selectedChatId,
-  onSelectChat,
-}) => {
+export const ChatSidebar: React.FC = () => {
   const { user, logout } = useAuthStore();
-  const { chats, isLoading } = useChatStore();
+
+  const { chats, isLoading, fetchChats, activeChat, setActiveChat } =
+    useChatStore();
+
   const [menuOpen, setMenuOpen] = useState(false);
+
+  useEffect(() => {
+    if (chats.length === 0) {
+      fetchChats();
+    }
+  }, [chats]);
 
   return (
     <div className="w-100 bg-white border-r-4 border-neutral-900 flex flex-col h-full">
@@ -28,12 +27,12 @@ export const ChatSidebar: React.FC<ChatSidebarProps> = ({
           <p className="text-center text-neutral-500">Loading chats...</p>
         ) : chats.length > 0 ? (
           <div className="space-y-2">
-            {chats.map((chat) => (
+            {chats?.map((chat) => (
               <ChatItem
                 key={chat._id}
                 chat={chat}
-                isSelected={selectedChatId === chat._id}
-                onClick={() => onSelectChat(chat._id)}
+                isSelected={activeChat === chat._id}
+                onClick={() => setActiveChat(chat._id)}
               />
             ))}
           </div>
