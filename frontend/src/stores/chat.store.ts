@@ -1,132 +1,84 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { create } from "zustand";
 import type { BaseChat, Message } from "@/types";
-import { callFindChatByIdApi, callGetUserChatsApi, getSocket } from "@/lib";
+import {
+  callCreateDirectChatApi,
+  callCreateGroupChatApi,
+  callFindChatByIdApi,
+  callGetUserChatsApi,
+} from "@/lib";
 
 interface ChatStore {
   chats: BaseChat[];
   activeChat: string | null;
-  messages: Message[];
+  messages: Message[] | [];
   typingUsers: string[];
   isLoading: boolean;
 
   fetchChats: () => Promise<void>;
   setActiveChat: (chatId: string) => Promise<void>;
-  sendMessage: (text: string, userId: string) => void;
-  handleTyping: (username: string) => void;
-  joinChat: (chatId: string) => void;
-  leaveChat: (chatId: string) => void;
+  createChat: (
+    type: string,
+    participantIds: string[],
+    name?: string
+  ) => Promise<void>;
+  setMessages: (messages: Message[]) => void;
   reset: () => void;
 }
 
-export const useChatStore = create<ChatStore>((set, get) => {
-  const socket = getSocket();
+export const useChatStore = create<ChatStore>((set, get) => ({
+  chats: [],
+  activeChat: null,
+  messages: [],
+  typingUsers: [],
+  isLoading: false,
 
-  if (socket && !socket.hasListeners) {
-    socket.on("receiveMessage", (msg: Message) => {
-      const { activeChat } = get();
-      if (msg.chatId === activeChat) {
-        set((state) => ({ messages: [...state.messages, msg] }));
-      }
-    });
-
-    socket.on("userTyping", ({ username }: { username: string }) => {
-      set((state) => ({
-        typingUsers: state.typingUsers.includes(username)
-          ? state.typingUsers
-          : [...state.typingUsers, username],
-      }));
-    });
-
-    socket.on("stopTyping", ({ username }: { username: string }) => {
-      set((state) => ({
-        typingUsers: state.typingUsers.filter((u) => u !== username),
-      }));
-    });
-
-    (socket as any).hasListeners = true;
-  }
-
-  return {
-    chats: [],
-    activeChat: null,
-    messages: [],
-    typingUsers: [],
-    isLoading: false,
-
-    fetchChats: async () => {
-      set({ isLoading: true });
-      try {
-        const res = await callGetUserChatsApi();
-        console.log(res, "from chat Store fetchChats");
-
-        if (res.success && Array.isArray(res.data) && res.data?.length) {
-          set({ chats: res.data });
-
-          if (!get().activeChat && res.data.length > 0) {
-            get().setActiveChat(res.data[0]._id);
-          }
+  fetchChats: async () => {
+    set({ isLoading: true });
+    try {
+      const res = await callGetUserChatsApi();
+      if (res.success && Array.isArray(res.data) && res.data.length) {
+        set({ chats: res.data });
+        if (!get().activeChat && res.data.length > 0) {
+          get().setActiveChat(res.data[0]._id);
         }
-      } finally {
-        set({ isLoading: false });
       }
-    },
+    } finally {
+      set({ isLoading: false });
+    }
+  },
 
-    setActiveChat: async (chatId: string) => {
-      set({ isLoading: true });
-      try {
-        const res = await callFindChatByIdApi(chatId);
-        if (res.success && res.data?.chat) {
-          socket?.emit("joinChat", chatId);
-          set({
-            activeChat: res.data.chat._id,
-            messages: res.data.messages || [],
-          });
-        }
-      } finally {
-        set({ isLoading: false });
+  setActiveChat: async (chatId: string) => {
+    set({ isLoading: true });
+    try {
+      const res = await callFindChatByIdApi(chatId);
+      if (res.success && res.data?.chat) {
+        set({
+          activeChat: res.data.chat._id,
+          messages: res.data.messages || [],
+        });
       }
-    },
+    } finally {
+      set({ isLoading: false });
+    }
+  },
 
-    sendMessage: (text: string, userId: string) => {
-      const { activeChat } = get();
-      if (!activeChat) return;
+  createChat: async (type: string, participantIds: string[], name?: string) => {
+    if (type === "direct") {
+      await callCreateDirectChatApi(participantIds[0]);
+    } else {
+      await callCreateGroupChatApi(participantIds, name);
+    }
+  },
 
-      console.log("Sending sending messages");
-      socket?.emit("sendMessage", {
-        chatId: activeChat,
-        text,
-        senderId: userId,
-      });
-    },
+  setMessages: (messages: Message[]) => set({ messages }), // added
 
-    handleTyping: (username: string) => {
-      const { activeChat } = get();
-      if (!activeChat) return;
-
-      socket?.emit("typing", { chatId: activeChat, username });
-
-      setTimeout(() => {
-        socket?.emit("stopTyping", { chatId: activeChat, username });
-      }, 2000);
-    },
-
-    reset: () => {
-      set({
-        chats: [],
-        activeChat: null,
-        messages: [],
-        typingUsers: [],
-        isLoading: false,
-      });
-    },
-
-    joinChat: (chatId: string) => {
-      socket?.emit("joinChat", chatId);
-    },
-
-    leaveChat: (chatId: string) => {
-      socket?.emit("leaveChat", chatId);
-    },
-  };
-});
+  reset: () => {
+    set({
+      chats: [],
+      activeChat: null,
+      messages: [],
+      typingUsers: [],
+      isLoading: false,
+    });
+  },
+}));
