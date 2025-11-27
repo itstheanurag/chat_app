@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import type { BaseChat, FindChatByIdResult } from "@/types/chat";
+import type { Message } from "@/types";
 import { formatApiError, extractErrorMessage } from "@/utils/formatter";
 import api from "../axios";
 import { errorToast, successToast } from "../toast";
@@ -130,11 +131,13 @@ export async function callCreateGroupChatApi(
  * @returns A result object containing the chat or an error message.
  */
 export async function callFindChatByIdApi(
-  chatId: string
+  chatId: string,
+  page: number = 1,
+  limit: number = 20
 ): Promise<ServerResponse<FindChatByIdResult>> {
   try {
     const response = await api.get<ServerResponse<FindChatByIdResult>>(
-      `/chats/${chatId}`
+      `/chats/${chatId}?page=${page}&limit=${limit}`
     );
     const resData = response.data;
 
@@ -156,6 +159,48 @@ export async function callFindChatByIdApi(
     const formattedError = extractErrorMessage(
       err,
       "Unexpected error while fetching chat details."
+    );
+    errorToast(formattedError);
+    return { success: false, error: formattedError };
+  }
+}
+
+/**
+ * Fetch messages for a specific chat with pagination.
+ * @param chatId - The ID of the chat.
+ * @param page - The page number (default 1).
+ * @param limit - The number of messages per page (default 20).
+ * @returns A result object containing the messages or an error message.
+ */
+export async function callGetChatMessagesApi(
+  chatId: string,
+  page: number = 1,
+  limit: number = 20
+): Promise<ServerResponse<Message[]>> {
+  try {
+    const response = await api.get<ServerResponse<Message[]>>(
+      `/messages/${chatId}?page=${page}&limit=${limit}`
+    );
+    const resData = response.data;
+
+    if (!resData.success) {
+      const formattedError = formatApiError(
+        resData.error,
+        "Failed to fetch messages."
+      );
+      errorToast(formattedError);
+      return { success: false, error: formattedError };
+    }
+
+    return {
+      success: true,
+      message: resData.message || "Messages fetched successfully.",
+      data: resData.data,
+    };
+  } catch (err: any) {
+    const formattedError = extractErrorMessage(
+      err,
+      "Unexpected error while fetching messages."
     );
     errorToast(formattedError);
     return { success: false, error: formattedError };

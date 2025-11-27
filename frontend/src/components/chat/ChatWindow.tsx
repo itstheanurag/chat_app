@@ -26,6 +26,7 @@ export const ChatWindow: React.FC = () => {
   const { socket, connect, sendMessage, typing, stopTyping } = useSocketStore();
   const prevScrollHeightRef = useRef<number>(0);
   const isFetchingMoreRef = useRef(false);
+  const isAtBottomRef = useRef(true);
 
   type TypingUser = { userId: string; username: string };
   const [typingUsers, setTypingUsers] = useState<TypingUser[]>([]);
@@ -46,10 +47,6 @@ export const ChatWindow: React.FC = () => {
   useEffect(() => {
     if (messagesContainerRef.current) {
       const container = messagesContainerRef.current;
-      const isNearBottom =
-        container.scrollHeight - container.scrollTop - container.clientHeight <
-        100;
-
       const lastMessage = messages[messages.length - 1];
       const isOwnMessage =
         (typeof lastMessage?.senderId === "string"
@@ -59,6 +56,7 @@ export const ChatWindow: React.FC = () => {
       // If we just loaded the first page (or switched chats), scroll to bottom
       if (prevScrollHeightRef.current === 0) {
         messagesEndRef.current?.scrollIntoView({ behavior: "auto" });
+        isAtBottomRef.current = true;
       } else if (isFetchingMoreRef.current) {
         // If we loaded more messages (pagination), restore scroll position
         if (container.scrollHeight > prevScrollHeightRef.current) {
@@ -66,8 +64,9 @@ export const ChatWindow: React.FC = () => {
             container.scrollHeight - prevScrollHeightRef.current;
         }
         isFetchingMoreRef.current = false;
-      } else if (isOwnMessage || isNearBottom) {
+      } else if (isOwnMessage || isAtBottomRef.current) {
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+        isAtBottomRef.current = true;
       }
 
       prevScrollHeightRef.current = container.scrollHeight;
@@ -77,13 +76,19 @@ export const ChatWindow: React.FC = () => {
   // Reset scroll height ref when active chat changes
   useEffect(() => {
     prevScrollHeightRef.current = 0;
+    isAtBottomRef.current = true;
   }, [activeChat]);
 
   const handleScroll = () => {
     if (messagesContainerRef.current) {
-      const { scrollTop } = messagesContainerRef.current;
+      const { scrollTop, scrollHeight, clientHeight } =
+        messagesContainerRef.current;
+
+      const isAtBottom = scrollHeight - scrollTop - clientHeight < 100;
+      isAtBottomRef.current = isAtBottom;
+
       if (scrollTop === 0 && hasMore && !isLoadingMessages) {
-        prevScrollHeightRef.current = messagesContainerRef.current.scrollHeight;
+        prevScrollHeightRef.current = scrollHeight;
         isFetchingMoreRef.current = true;
         fetchMoreMessages();
       }

@@ -36,13 +36,26 @@ export const createMessage = async (
 
   const message = new Message({ ...parsed.data, senderId: user!.id });
   await message.save();
+  await message.populate("senderId", "name email");
   sendResponse(res, 201, message, "Message created successfully");
 };
 
 export const getMessages = async (req: Request, res: Response) => {
   try {
-    const messages = await Message.find({ chatId: req.params.chatId });
-    sendResponse(res, 200, messages, "Messages fetched successfully");
+    const { chatId } = req.params;
+    const page = parseInt(req.query.page as string) || 1;
+    const limit = parseInt(req.query.limit as string) || 20;
+    const skip = (page - 1) * limit;
+
+    const messages = await Message.find({ chatId })
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit)
+      .populate("senderId", "name email");
+
+    const sortedMessages = messages.reverse();
+
+    sendResponse(res, 200, sortedMessages, "Messages fetched successfully");
   } catch (err: unknown) {
     sendError(res, 500, err);
   }
