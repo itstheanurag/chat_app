@@ -1,22 +1,31 @@
 import React, { useState, useEffect, useRef } from "react";
-import type { BaseChat, Message } from "@/types";
+import type { Message } from "@/types";
 import { MessageBubble } from "./MessageBubble";
 import { Send } from "lucide-react";
 import ChatHeader from "./ChatHeader";
 import { useAuthStore } from "@/stores/user.store";
 import { useChatStore, useSocketStore } from "@/stores";
-import { callFindChatByIdApi } from "@/lib/apis/chat";
-import { errorToast } from "@/lib";
+import { formatDateSeparator } from "@/utils/formatter";
 
 export const ChatWindow: React.FC = () => {
   const { user } = useAuthStore();
-  const { fetchChats, activeChat, messages, setMessages } = useChatStore();
-  const [chat, setChat] = useState<BaseChat | null>(null);
+  const {
+    fetchChats,
+    activeChat,
+    selectedChat,
+    messages,
+    setMessages,
+    fetchMoreMessages,
+    hasMore,
+    isLoadingMessages,
+  } = useChatStore();
   const [messageInput, setMessageInput] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const fetchedChatRef = useRef<string | null>(null);
+  const messagesContainerRef = useRef<HTMLDivElement>(null);
   const typingTimeoutRef = useRef<number | null>(null);
   const { socket, connect, sendMessage, typing, stopTyping } = useSocketStore();
+  const prevScrollHeightRef = useRef<number>(0);
+  const isFetchingMoreRef = useRef(false);
 
   type TypingUser = { userId: string; username: string };
   const [typingUsers, setTypingUsers] = useState<TypingUser[]>([]);
@@ -33,35 +42,53 @@ export const ChatWindow: React.FC = () => {
     if (user && !socket) connect(user.id);
   }, [user, socket]);
 
+  // Scroll to bottom on initial load or new message (if near bottom)
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    if (messagesContainerRef.current) {
+      const container = messagesContainerRef.current;
+      const isNearBottom =
+        container.scrollHeight - container.scrollTop - container.clientHeight <
+        100;
+
+      const lastMessage = messages[messages.length - 1];
+      const isOwnMessage =
+        (typeof lastMessage?.senderId === "string"
+          ? lastMessage.senderId
+          : lastMessage?.senderId?._id) === user?.id;
+
+      // If we just loaded the first page (or switched chats), scroll to bottom
+      if (prevScrollHeightRef.current === 0) {
+        messagesEndRef.current?.scrollIntoView({ behavior: "auto" });
+      } else if (isFetchingMoreRef.current) {
+        // If we loaded more messages (pagination), restore scroll position
+        if (container.scrollHeight > prevScrollHeightRef.current) {
+          container.scrollTop =
+            container.scrollHeight - prevScrollHeightRef.current;
+        }
+        isFetchingMoreRef.current = false;
+      } else if (isOwnMessage || isNearBottom) {
+        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+      }
+
+      prevScrollHeightRef.current = container.scrollHeight;
+    }
   }, [messages]);
 
-  /** Fetch chat when activeChat changes */
+  // Reset scroll height ref when active chat changes
   useEffect(() => {
-    if (!activeChat || activeChat.length !== 24) return;
-    if (fetchedChatRef.current === activeChat) return;
-
-    let isMounted = true;
-
-    const fetchChat = async () => {
-      try {
-        const res = await callFindChatByIdApi(activeChat);
-        if (isMounted && res.success && res.data?.chat) {
-          setChat(res.data.chat);
-          setMessages(res.data.messages || []);
-          fetchedChatRef.current = activeChat;
-        }
-      } catch (err) {
-        errorToast((err as any)?.message || "Failed to load chat");
-      }
-    };
-
-    fetchChat();
-    return () => {
-      isMounted = false;
-    };
+    prevScrollHeightRef.current = 0;
   }, [activeChat]);
+
+  const handleScroll = () => {
+    if (messagesContainerRef.current) {
+      const { scrollTop } = messagesContainerRef.current;
+      if (scrollTop === 0 && hasMore && !isLoadingMessages) {
+        prevScrollHeightRef.current = messagesContainerRef.current.scrollHeight;
+        isFetchingMoreRef.current = true;
+        fetchMoreMessages();
+      }
+    }
+  };
 
   useEffect(() => {
     if (!socket || !activeChat) return;
@@ -72,7 +99,12 @@ export const ChatWindow: React.FC = () => {
       const currentMessages = useChatStore.getState().messages;
       setMessages([...currentMessages, message]);
 
-      if (message.senderId._id !== user!.id) {
+      const senderId =
+        typeof message.senderId === "string"
+          ? message.senderId
+          : message.senderId._id;
+
+      if (senderId !== user!.id) {
         await fetchChats();
       }
     };
@@ -97,7 +129,7 @@ export const ChatWindow: React.FC = () => {
       socket.off("userTyping", handleUserTyping);
       socket.off("stopTyping", handleStopTyping);
     };
-  }, [activeChat]);
+  }, [activeChat, socket]);
 
   const handleSendMessage = async (e?: React.FormEvent) => {
     e?.preventDefault();
@@ -121,18 +153,46 @@ export const ChatWindow: React.FC = () => {
 
   return (
     <div className="flex-1 flex flex-col h-full bg-white">
-      <ChatHeader chat={chat} />
+      <ChatHeader chat={selectedChat} />
 
       {/* Messages container */}
-      <div className="flex-1 overflow-y-auto p-6 space-y-4">
-        {messages.map((m) => (
-          <MessageBubble
-            key={m._id}
-            message={m}
-            isOwn={m.senderId.toString() === user?.id}
-            showSeen={!!chat?.participants?.length}
-          />
-        ))}
+      <div
+        ref={messagesContainerRef}
+        onScroll={handleScroll}
+        className="flex-1 overflow-y-auto p-6 space-y-4"
+      >
+        {isLoadingMessages && hasMore && (
+          <div className="text-center py-2">
+            <span className="text-xs text-gray-500 font-mono">
+              Loading older messages...
+            </span>
+          </div>
+        )}
+        {messages.map((m, index) => {
+          const currentDate = new Date(m.createdAt).toDateString();
+          const prevDate =
+            index > 0
+              ? new Date(messages[index - 1].createdAt).toDateString()
+              : null;
+          const showDateSeparator = currentDate !== prevDate;
+
+          return (
+            <React.Fragment key={m._id}>
+              {showDateSeparator && (
+                <div className="flex justify-center my-6 sticky top-0 z-10">
+                  <span className="bg-violet-100 text-gray-900 text-xs font-bold font-mono px-3 py-1 border-2 border-gray-900 shadow-[2px_2px_0px_0px_rgba(15,23,42,1)] uppercase tracking-wider">
+                    {formatDateSeparator(m.createdAt)}
+                  </span>
+                </div>
+              )}
+              <MessageBubble
+                message={m}
+                isOwn={m.senderId.toString() === user?.id}
+                showSeen={!!selectedChat?.participants?.length}
+              />
+            </React.Fragment>
+          );
+        })}
         <div ref={messagesEndRef} />
       </div>
 
@@ -146,7 +206,7 @@ export const ChatWindow: React.FC = () => {
       {/* Input */}
       <form
         onSubmit={handleSendMessage}
-        className="flex items-end gap-4 p-6 border-t"
+        className="flex items-end gap-4 p-6 border-t-4 border-gray-900 bg-violet-50"
       >
         <textarea
           value={messageInput}
@@ -155,7 +215,7 @@ export const ChatWindow: React.FC = () => {
             handleTyping();
           }}
           placeholder="Type your message..."
-          className="flex-1 resize-none border p-3 rounded"
+          className="flex-1 resize-none border-2 border-gray-900 p-4 rounded-none bg-white font-mono focus:outline-none focus:bg-violet-50 transition-colors shadow-button"
           rows={1}
           onKeyDown={(e) => {
             if (e.key === "Enter" && !e.shiftKey) {
@@ -167,7 +227,7 @@ export const ChatWindow: React.FC = () => {
         <button
           type="submit"
           disabled={!messageInput.trim()}
-          className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+          className="px-6 py-4 bg-gray-900 text-white font-bold font-mono border-2 border-gray-900 shadow-button hover:bg-violet-600 hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none transition-all disabled:opacity-50 disabled:cursor-not-allowed"
         >
           <Send className="h-5 w-5" />
         </button>

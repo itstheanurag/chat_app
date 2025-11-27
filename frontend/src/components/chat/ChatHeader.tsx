@@ -14,8 +14,8 @@ const ChatHeader: React.FC<ChatHeaderProps> = ({ chat }) => {
 
   if (!chat) {
     return (
-      <div className="bg-sage-100 border-b-4 border-slate-900 p-6 flex items-center justify-center">
-        <p className="text-slate-600 italic">
+      <div className="bg-violet-100 border-b-4 border-gray-900 p-6 flex items-center justify-center">
+        <p className="text-gray-600 italic font-mono">
           No active chat. Select a conversation or start a new one.
         </p>
       </div>
@@ -23,36 +23,36 @@ const ChatHeader: React.FC<ChatHeaderProps> = ({ chat }) => {
   }
 
   return (
-    <div className="bg-sage-100 border-b-4 border-slate-900 p-6">
+    <div className="bg-violet-100 border-b-4 border-gray-900 p-6">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
           <ChatAvatar chat={chat} user={user} />
 
           <div>
-            <h2 className="text-xl font-bold text-slate-900">
+            <h2 className="text-xl font-bold text-gray-900 font-tertiary uppercase tracking-wide">
               {extractChatName(chat, user)}
             </h2>
-            <p className="text-sm text-slate-600">
+            <p className="text-sm text-gray-600 font-mono font-bold">
               {chat.type === "group"
-                ? `${chat.participants?.length} members`
-                : "Online"}
+                ? `${chat.participants?.length} MEMBERS`
+                : "ONLINE"}
             </p>
           </div>
         </div>
 
         <div className="flex items-center gap-3">
-          <button className="p-3 text-slate-600 hover:text-slate-900 hover:bg-white border-2 border-transparent hover:border-slate-300 transition-all">
+          <button className="p-3 text-gray-900 bg-white border-2 border-gray-900 shadow-button hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-none transition-all">
             <Phone className="h-5 w-5" />
           </button>
-          <button className="p-3 text-slate-600 hover:text-slate-900 hover:bg-white border-2 border-transparent hover:border-slate-300 transition-all">
+          <button className="p-3 text-gray-900 bg-white border-2 border-gray-900 shadow-button hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-none transition-all">
             <Video className="h-5 w-5" />
           </button>
           {chat.type === "group" && (
-            <div className="p-3 text-slate-600 hover:text-slate-900 hover:bg-white border-2 border-transparent hover:border-slate-300 transition-all">
+            <div className="p-3 text-gray-900 bg-white border-2 border-gray-900 shadow-button hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-none transition-all cursor-pointer">
               <Users className="h-5 w-5" />
             </div>
           )}
-          <button className="p-3 text-slate-600 hover:text-slate-900 hover:bg-white border-2 border-transparent hover:border-slate-300 transition-all">
+          <button className="p-3 text-gray-900 bg-white border-2 border-gray-900 shadow-button hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-none transition-all">
             <MoreVertical className="h-5 w-5" />
           </button>
         </div>
