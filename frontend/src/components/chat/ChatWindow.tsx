@@ -27,6 +27,7 @@ export const ChatWindow: React.FC = () => {
   const prevScrollHeightRef = useRef<number>(0);
   const isFetchingMoreRef = useRef(false);
   const isAtBottomRef = useRef(true);
+  const wasAtBottomRef = useRef(true);
 
   type TypingUser = { userId: string; username: string };
   const [typingUsers, setTypingUsers] = useState<TypingUser[]>([]);
@@ -64,7 +65,7 @@ export const ChatWindow: React.FC = () => {
             container.scrollHeight - prevScrollHeightRef.current;
         }
         isFetchingMoreRef.current = false;
-      } else if (isOwnMessage || isAtBottomRef.current) {
+      } else if (isOwnMessage || wasAtBottomRef.current) {
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
         isAtBottomRef.current = true;
       }
@@ -77,6 +78,7 @@ export const ChatWindow: React.FC = () => {
   useEffect(() => {
     prevScrollHeightRef.current = 0;
     isAtBottomRef.current = true;
+    wasAtBottomRef.current = true;
   }, [activeChat]);
 
   const handleScroll = () => {
@@ -101,6 +103,13 @@ export const ChatWindow: React.FC = () => {
     socket.emit("joinChat", activeChat);
 
     const handleNewMessage = async (message: Message) => {
+      // Capture if we are at bottom BEFORE adding the message
+      if (messagesContainerRef.current) {
+        const { scrollTop, scrollHeight, clientHeight } =
+          messagesContainerRef.current;
+        wasAtBottomRef.current = scrollHeight - scrollTop - clientHeight < 100;
+      }
+
       const currentMessages = useChatStore.getState().messages;
       setMessages([...currentMessages, message]);
 
@@ -184,7 +193,7 @@ export const ChatWindow: React.FC = () => {
           return (
             <React.Fragment key={m._id}>
               {showDateSeparator && (
-                <div className="flex justify-center my-6 sticky top-0 z-10">
+                <div className="flex justify-center my-6">
                   <span className="bg-violet-100 text-gray-900 text-xs font-bold font-mono px-3 py-1 border-2 border-gray-900 shadow-[2px_2px_0px_0px_rgba(15,23,42,1)] uppercase tracking-wider">
                     {formatDateSeparator(m.createdAt)}
                   </span>
